@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>抹茶ログ | Matcha Log</title>
 
-<!-- Tailwind CSS (CDN, supports arbitrary values like bg-[#8DC48D]) -->
+<!-- Tailwind CSS (CDN build, supports arbitrary values like bg-[#8DC48D]) -->
 <script src="https://cdn.tailwindcss.com"></script>
 
 <!-- React + ReactDOM (UMD builds) -->
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
-<!-- Babel standalone, for in-browser JSX transform -->
+<!-- Babel standalone: transforms the JSX below directly in the browser -->
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
 <style>
@@ -24,7 +24,7 @@
 <div id="root"></div>
 
 <script type="text/babel" data-presets="react">
-const { useState, useMemo } = React;
+const { useState, useMemo, useEffect } = React;
 
 
 /* ---------------------------------------------
@@ -2669,11 +2669,30 @@ function MatchaApp({ lang, setLang, records, setRecords, userEmail, nickname, is
 
 /* ================= ROOT ================= */
 function MatchaLogRoot() {
-  const [lang, setLang] = useState("zh");
-  const [records, setRecords] = useState(seedData);
-  const [userEmail, setUserEmail] = useState(null);
-  const [nickname, setNickname] = useState("");
-  const [isGuest, setIsGuest] = useState(false);
+  const STORAGE_KEY = "matchaLogState";
+  const loadSaved = () => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  };
+  const saved = loadSaved();
+
+  const [lang, setLang] = useState(saved && saved.lang ? saved.lang : "zh");
+  const [records, setRecords] = useState(saved && saved.records ? saved.records : seedData);
+  const [userEmail, setUserEmail] = useState(saved && saved.userEmail !== undefined ? saved.userEmail : null);
+  const [nickname, setNickname] = useState(saved && saved.nickname ? saved.nickname : "");
+  const [isGuest, setIsGuest] = useState(saved && saved.isGuest ? saved.isGuest : false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ lang, records, userEmail, nickname, isGuest }));
+    } catch (e) {
+      // localStorage unavailable (e.g. private browsing) - fail silently
+    }
+  }, [lang, records, userEmail, nickname, isGuest]);
 
   const handleSignup = (email, nick) => { setUserEmail(email); setNickname(nick || ""); setIsGuest(false); };
   const handleLogin = (email) => { setUserEmail(email); setIsGuest(false); };
