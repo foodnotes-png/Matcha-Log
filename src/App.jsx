@@ -13,6 +13,22 @@ const FONT_STYLE = (
     @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
     .font-display { font-family: 'Noto Serif TC', serif; }
     .font-body { font-family: 'Noto Sans TC', sans-serif; }
+    html, body {
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior-y: none;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* iOS Safari/Chrome: the address bar resizes the viewport, so 100vh can be
+       taller than what's actually visible. Prefer dvh where supported, with
+       vh as the fallback for older browsers. */
+    .min-h-screen { min-height: 100vh; min-height: 100dvh; }
+    .safe-pb { padding-bottom: env(safe-area-inset-bottom); }
+    .safe-pt { padding-top: env(safe-area-inset-top); }
+    @media (max-width: 640px) {
+      /* iOS Safari auto-zooms on focus when an input's font-size is under 16px */
+      input, select, textarea { font-size: 16px !important; }
+    }
     button {
       border-radius: 9999px !important;
       color: #45320F !important;
@@ -300,6 +316,7 @@ const STR = {
     settings_export: "匯出全部資料", settings_import: "匯入資料", settings_clear: "清除所有資料",
     settings_clear_confirm: "確定要清除所有紀錄嗎？此操作無法復原。",
     settings_clear_yes: "確認清除",
+    settings_storage_note: "登入帳號後資料會保存在帳號雲端；訪客資料只存在這台裝置",
     auth_guest: "以訪客身份繼續",
     delete: "刪除紀錄",
     delete_confirm_msg: "刪除後資料無法復原",
@@ -378,6 +395,7 @@ const STR = {
     settings_export: "Export All Data", settings_import: "Import Data", settings_clear: "Clear All Data",
     settings_clear_confirm: "Are you sure you want to clear all records? This cannot be undone.",
     settings_clear_yes: "Confirm Clear",
+    settings_storage_note: "Data is saved to your account in the cloud when logged in; guest data stays only on this device.",
     auth_guest: "Continue as Guest",
     delete: "Delete record",
     delete_confirm_msg: "This cannot be undone once deleted",
@@ -456,6 +474,7 @@ const STR = {
     settings_export: "全データを書き出す", settings_import: "データを読み込む", settings_clear: "すべてのデータを削除",
     settings_clear_confirm: "本当にすべての記録を削除しますか？この操作は取り消せません。",
     settings_clear_yes: "削除する",
+    settings_storage_note: "アカウントでログインするとデータはクラウドに保存されます。ゲストのデータはこの端末にのみ保存されます。",
     auth_guest: "ゲストとして続ける",
     delete: "記録を削除",
     delete_confirm_msg: "削除すると元に戻せません",
@@ -534,6 +553,7 @@ const STR = {
     settings_export: "전체 데이터 내보내기", settings_import: "데이터 가져오기", settings_clear: "모든 데이터 삭제",
     settings_clear_confirm: "정말로 모든 기록을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
     settings_clear_yes: "삭제 확인",
+    settings_storage_note: "계정으로 로그인하면 데이터가 클라우드에 저장됩니다. 게스트 데이터는 이 기기에만 저장됩니다.",
     auth_guest: "게스트로 계속하기",
     delete: "기록 삭제",
     delete_confirm_msg: "삭제하면 복구할 수 없습니다",
@@ -860,7 +880,7 @@ function AuthScreen({ onLogin, onSignup, onGuest }) {
             以訪客身份繼續
           </button>
         </div>
-        <p className="text-center text-[11px] text-[#B0A990] mt-5">僅供本機示範使用，帳號資料不會離開這個頁面。</p>
+        <p className="text-center text-[11px] text-[#B0A990] mt-5">資料只會儲存於本裝置，如需保存資料請登入帳號</p>
       </div>
     </div>
   );
@@ -913,7 +933,7 @@ function LogUsageScreen({ lang, record, onCancel, onSave }) {
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-end justify-center z-50" onClick={onCancel}>
-      <div className="bg-white rounded-t-3xl w-full max-w-2xl max-h-[85vh] overflow-y-auto font-body text-[#2E2A24]" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-white rounded-t-3xl w-full max-w-2xl max-h-[85vh] max-h-[85dvh] overflow-y-auto font-body text-[#2E2A24] safe-pb" onClick={(e) => e.stopPropagation()}>
         {FONT_STYLE}
         <div className="flex justify-center pt-3">
           <div className="w-10 h-1.5 rounded-full bg-[#D9D2C2]" />
@@ -2483,7 +2503,7 @@ function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, 
           <>
             {nickname && <p className="text-sm text-[#1B4A38] font-medium">{nickname}</p>}
             <p className="text-sm text-[#2E2A24] mb-4">{userEmail}</p>
-            <button onClick={onLogout} className="text-sm text-[#A24B3A] hover:underline">{t("settings_logout")}</button>
+            <button onClick={onLogout} className="text-sm px-4 py-2 rounded-full border border-[#E4DFCF] text-[#A24B3A] hover:border-[#A24B3A] transition">{t("settings_logout")}</button>
           </>
         )}
       </section>
@@ -2545,6 +2565,10 @@ function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, 
           </div>
         )}
       </section>
+
+      <p className="text-center text-[11px] text-[#B0A990] mt-6">
+        {t("settings_storage_note")}
+      </p>
     </div>
   );
 }
@@ -2608,7 +2632,7 @@ function MatchaApp({ lang, setLang, records, setRecords, userEmail, nickname, is
   ];
 
   return (
-    <div className="min-h-screen w-full bg-[#E0E6DA] font-body text-[#2E2A24] pb-20">
+    <div className="min-h-screen w-full bg-[#E0E6DA] font-body text-[#2E2A24] pb-20 safe-pb">
       {FONT_STYLE}
       <main className="max-w-3xl mx-auto px-6">
         {tab === "home" && (
@@ -2626,7 +2650,7 @@ function MatchaApp({ lang, setLang, records, setRecords, userEmail, nickname, is
         )}
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur z-10">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur z-10 safe-pb">
         <div className="max-w-3xl mx-auto grid grid-cols-6">
           {TABS.map((tb) => (
             <button key={tb.key} onClick={() => setTab(tb.key)} className="btn-nav flex flex-col items-center gap-0.5 py-2.5">
