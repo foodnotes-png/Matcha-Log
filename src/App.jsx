@@ -15,7 +15,6 @@ const FONT_STYLE = (
     .font-body { font-family: 'Noto Sans TC', sans-serif; }
     html, body {
       -webkit-tap-highlight-color: transparent;
-      overscroll-behavior-y: none;
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
     }
@@ -25,6 +24,10 @@ const FONT_STYLE = (
     .min-h-screen { min-height: 100vh; min-height: 100dvh; }
     .safe-pb { padding-bottom: env(safe-area-inset-bottom); }
     .safe-pt { padding-top: env(safe-area-inset-top); }
+    /* main scroll area: keep enough room to clear the fixed bottom nav (5rem)
+       AND the safe-area inset, additively (a plain pb-20 + safe-pb combo on
+       the same element would just overwrite one another instead of adding). */
+    .content-safe-pb { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
     @media (max-width: 640px) {
       /* iOS Safari auto-zooms on focus when an input's font-size is under 16px */
       input, select, textarea { font-size: 16px !important; }
@@ -2632,7 +2635,7 @@ function MatchaApp({ lang, setLang, records, setRecords, userEmail, nickname, is
   ];
 
   return (
-    <div className="min-h-screen w-full bg-[#E0E6DA] font-body text-[#2E2A24] pb-20 safe-pb">
+    <div className="min-h-screen w-full bg-[#E0E6DA] font-body text-[#2E2A24] content-safe-pb">
       {FONT_STYLE}
       <main className="max-w-3xl mx-auto px-6">
         {tab === "home" && (
