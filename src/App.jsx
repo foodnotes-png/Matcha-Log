@@ -262,6 +262,7 @@ const STR = {
     records_title: "使用紀錄",
     records_search: "搜尋品牌、產地、商店或備註...",
     filter_occasion: "用途", filter_rating: "星級", filter_all: "全部",
+    filter_category: "類別",
     filter_price: "價錢", price_asc: "由低至高", price_desc: "由高至低",
     records_totalUsed: "累積使用", records_usageCount: "總使用次數",
     usage_earliest: "最早使用", usage_latest: "最近使用", filter_usageDate: "使用日期",
@@ -341,6 +342,7 @@ const STR = {
     records_title: "Records",
     records_search: "Search brand, origin, store or notes...",
     filter_occasion: "Occasion", filter_rating: "Rating", filter_all: "All",
+    filter_category: "Category",
     filter_price: "Price", price_asc: "Low to High", price_desc: "High to Low",
     records_totalUsed: "Total Used", records_usageCount: "Total Usage Count",
     usage_earliest: "Earliest Use", usage_latest: "Latest Use", filter_usageDate: "Usage Date",
@@ -420,6 +422,7 @@ const STR = {
     records_title: "記録",
     records_search: "ブランド、産地、店舗、メモを検索...",
     filter_occasion: "用途", filter_rating: "評価", filter_all: "すべて",
+    filter_category: "種類",
     filter_price: "価格", price_asc: "安い順", price_desc: "高い順",
     records_totalUsed: "累計使用量", records_usageCount: "総使用回数",
     usage_earliest: "開封が古い順", usage_latest: "開封が新しい順", filter_usageDate: "使用日",
@@ -499,6 +502,7 @@ const STR = {
     records_title: "기록",
     records_search: "브랜드, 원산지, 매장 또는 메모 검색...",
     filter_occasion: "용도", filter_rating: "별점", filter_all: "전체",
+    filter_category: "종류",
     filter_price: "가격", price_asc: "낮은 가격순", price_desc: "높은 가격순",
     records_totalUsed: "누적 사용량", records_usageCount: "총 사용 횟수",
     usage_earliest: "가장 오래 개봉", usage_latest: "가장 최근 개봉", filter_usageDate: "사용일",
@@ -706,7 +710,7 @@ function NavIcon({ name, active }) {
   }
 }
 
-const CURRENCIES = ["JPY¥", "GBP£", "HKD$", "KRW₩", "USD$", "CNY¥"];
+const CURRENCIES = ["JPY¥", "CNY¥", "GBP£", "HKD$", "KRW₩", "USD$"];
 // Approximate static exchange rates to USD, for comparing prices across currencies.
 // NOTE: this is a fixed reference table baked into the app, not a live/hourly feed —
 // a frontend-only demo has no backend to call a real FX API from.
@@ -776,10 +780,13 @@ function recordToForm(r) {
 }
 
 // weight/status helpers (weight tracking is derived, not separately stored)
+function roundG(n) {
+  return Math.round((Number(n) || 0) * 100) / 100;
+}
 function computeRemaining(r) {
   const init = Number(r.initialWeight) || 0;
   const used = (r.usageLog || []).reduce((s, u) => s + (Number(u.amount) || 0), 0);
-  return Math.max(0, init - used);
+  return roundG(Math.max(0, init - used));
 }
 function computeStatus(r) {
   const init = Number(r.initialWeight) || 0;
@@ -927,7 +934,7 @@ function LogUsageScreen({ lang, record, onCancel, onSave }) {
     const finalPurposes = purposes.map((p) => (p === "其他" ? (purposeOther.trim() || "其他") : p));
     const finalUsage = isPresetUsage ? (usage === "其他" ? usageOther : usage) : usageOther;
     onSave({
-      date: date.trim(), time: `${hour}:${minute}`, amount: amt, purposes: finalPurposes,
+      date: date.trim(), time: `${hour}:${minute}`, amount: roundG(amt), purposes: finalPurposes,
       teaStyle: showTeaStyle ? teaStyle : "", usage: finalUsage.trim(), note: note.trim(),
     });
   };
@@ -984,7 +991,7 @@ function LogUsageScreen({ lang, record, onCancel, onSave }) {
                 <span>{t("weight_amount_label")}</span>
               </div>
               <div className="flex items-center gap-1">
-                <input type="number" min={0} value={amount} onChange={(e) => setAmount(e.target.value)}
+                <input type="number" min={0} step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)}
                   className="w-16 text-sm text-right bg-transparent outline-none" />
                 <span className="text-sm text-[#8A8371]">g</span>
               </div>
@@ -1105,7 +1112,7 @@ function UsageLogItem({ lang, entry, category, onSave, onDelete }) {
           <span>{entry.time ? `${entry.date} ${entry.time}` : entry.date}</span>
           <div className="flex items-center gap-2">
             <span className="font-medium">{entry.amount}g</span>
-            <button onClick={() => setEditing(true)} className="btn-plain text-[#8A8371] hover:text-[#2B7056]">{t("action_edit")}</button>
+            <button onClick={() => setEditing(true)} aria-label={t("action_edit")} className="btn-plain text-[#8A8371] hover:text-[#2B7056]"><EditIcon size={12} /></button>
             <button onClick={() => onDelete(entry.id)} className="btn-plain text-[#B08A6A] hover:text-[#8a4a3a]"><TrashIcon size={12} /></button>
           </div>
         </div>
@@ -1127,7 +1134,7 @@ function UsageLogItem({ lang, entry, category, onSave, onDelete }) {
     const finalPurposes = purposes.map((p) => (p === "其他" ? (purposeOther.trim() || "其他") : p));
     const finalUsage = isPresetUsage ? (usage === "其他" ? usageOther : usage) : usageOther;
     onSave(entry.id, {
-      date: date.trim(), time: `${hour}:${minute}`, amount: amt, purposes: finalPurposes,
+      date: date.trim(), time: `${hour}:${minute}`, amount: roundG(amt), purposes: finalPurposes,
       teaStyle: showTeaStyle ? teaStyle : "", usage: finalUsage.trim(), note: note.trim(),
     });
   };
@@ -1148,7 +1155,7 @@ function UsageLogItem({ lang, entry, category, onSave, onDelete }) {
           {MINUTES_60.map((m) => <option key={m} value={m}>{m}</option>)}
         </select>
         <div className="relative flex-1">
-          <input type="number" min={0} value={amount} onChange={(e) => setAmount(e.target.value)}
+          <input type="number" min={0} step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)}
             className="w-full rounded-lg border border-[#E4DFCF] pl-2 pr-6 py-1.5 text-xs outline-none" />
           <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-[#B0A990]">g</span>
         </div>
@@ -1389,7 +1396,7 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px]">
               <ViewField label={t("add_category")} value={CATEGORY_LABEL[liveRecord.category] ? CATEGORY_LABEL[liveRecord.category][lang] : liveRecord.category} />
               <ViewField label={t("add_brand")} value={liveRecord.brand} />
               <ViewField label={t("add_origin")} value={liveRecord.origin || "—"} />
@@ -1469,7 +1476,7 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
       origin: form.origin.trim(),
       cultivar: form.cultivar.trim(),
       store: form.store.trim(),
-      price: String(form.price).trim(),
+      price: form.price === "" ? "" : String(roundG(Number(form.price))),
       occasions: finalOccasions,
       usage: finalUsage.trim(),
       teaStyle: form.category === "抹茶" && form.occasions.includes("純飲") ? form.teaStyle : "",
@@ -1575,7 +1582,7 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
             <div className="flex flex-col gap-1">
               <label className="text-xs text-[#8A8371]">{t("add_weight")}</label>
               <div className="relative">
-                <input type="number" min={0} value={form.initialWeight} onChange={(e) => update("initialWeight", e.target.value)}
+                <input type="number" min={0} step="0.01" value={form.initialWeight} onChange={(e) => update("initialWeight", e.target.value)}
                   className="w-full rounded-lg border border-[#E4DFCF] pl-3 pr-8 py-2 text-sm outline-none focus:border-[#8DC48D]" />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#B0A990]">g</span>
               </div>
@@ -1601,7 +1608,7 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
                   className="rounded-lg border border-[#E4DFCF] px-2 py-2 text-sm outline-none focus:border-[#8DC48D] bg-white w-24">
                   {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
-                <input type="number" min={0} value={form.price} onChange={(e) => update("price", e.target.value)}
+                <input type="number" min={0} step="0.01" value={form.price} onChange={(e) => update("price", e.target.value)}
                   className="flex-1 rounded-lg border border-[#E4DFCF] px-3 py-2 text-sm outline-none focus:border-[#8DC48D]" />
               </div>
             </div>
@@ -1764,7 +1771,7 @@ function ViewField({ label, value }) {
   return (
     <div className="flex flex-col gap-1">
       <label className="text-xs text-[#8A8371]">{label}</label>
-      <p className="text-sm text-[#2E2A24] py-2 break-words">{value}</p>
+      <p className="text-sm text-[#2E2A24] py-[5.6px] break-words">{value}</p>
     </div>
   );
 }
@@ -1869,12 +1876,15 @@ function avgRating(records) {
 function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
   const t = (k) => STR[lang][k] ?? k;
   const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("全部");
   const [occFilter, setOccFilter] = useState("全部");
-  const [starFilter, setStarFilter] = useState(0);
   const [priceSort, setPriceSort] = useState(null); // null | "asc" | "desc"
   const [usageSort, setUsageSort] = useState(null); // null | "earliest" | "latest"
   const [statusFilter, setStatusFilter] = useState("全部");
-  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
+  const occasionChoices = ["抹茶", "焙茶", "玄米茶"].includes(categoryFilter)
+    ? getOccasions(categoryFilter)
+    : OCCASIONS.filter((o) => !LATTE_LABELS.includes(o));
 
   const totalUsedGrams = useMemo(
     () => records.reduce((sum, r) => sum + (r.usageLog || []).reduce((s, u) => s + (Number(u.amount) || 0), 0), 0),
@@ -1885,8 +1895,12 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     const base = records
+      .filter((r) => {
+        if (categoryFilter === "全部") return true;
+        if (categoryFilter === "其他") return !["抹茶", "焙茶", "玄米茶"].includes(r.category);
+        return r.category === categoryFilter;
+      })
       .filter((r) => occFilter === "全部" || (r.occasions || []).includes(occFilter))
-      .filter((r) => starFilter === 0 || r.rating === starFilter)
       .filter((r) => statusFilter === "全部" || computeStatus(r) === statusFilter)
       .filter((r) => !q || `${r.brand}${r.origin}${r.store}${r.cultivar}`.toLowerCase().includes(q));
 
@@ -1911,7 +1925,7 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
       return [...withPrice, ...withoutPrice];
     }
     return base.sort((a, b) => b.id - a.id);
-  }, [records, search, occFilter, starFilter, priceSort, usageSort, statusFilter]);
+  }, [records, search, categoryFilter, occFilter, priceSort, usageSort, statusFilter]);
 
   return (
     <div>
@@ -1950,21 +1964,21 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
         </div>
 
         <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-xs text-[#8A8371] mr-1">{t("filter_occasion")}</span>
-          {["全部", ...OCCASIONS].map((o) => (
-            <button key={o} onClick={() => setOccFilter(o)}
-              className={`text-xs px-3 py-1.5 rounded-full border transition ${occFilter === o ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
-              {o === "全部" ? t("filter_all") : OCC_LABEL[o][lang]}
+          <span className="text-xs text-[#8A8371] mr-1">{t("filter_category")}</span>
+          {["全部", "抹茶", "焙茶", "玄米茶", "其他"].map((c) => (
+            <button key={c} onClick={() => { setCategoryFilter(c); setOccFilter("全部"); }}
+              className={`text-xs px-3 py-1.5 rounded-full border transition ${categoryFilter === c ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+              {c === "全部" ? t("filter_all") : (CATEGORY_LABEL[c] ? CATEGORY_LABEL[c][lang] : c)}
             </button>
           ))}
         </div>
 
         <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-xs text-[#8A8371] mr-1">{t("filter_rating")}</span>
-          {[0, 5, 4, 3, 2, 1].map((n) => (
-            <button key={n} onClick={() => setStarFilter(n)}
-              className={`text-xs px-3 py-1.5 rounded-full border transition ${starFilter === n ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#C9A227]"}`}>
-              {n === 0 ? t("filter_all") : `${n} ★`}
+          <span className="text-xs text-[#8A8371] mr-1">{t("filter_occasion")}</span>
+          {["全部", ...occasionChoices].map((o) => (
+            <button key={o} onClick={() => setOccFilter(o)}
+              className={`text-xs px-3 py-1.5 rounded-full border transition ${occFilter === o ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+              {o === "全部" ? t("filter_all") : OCC_LABEL[o][lang]}
             </button>
           ))}
         </div>
@@ -2006,12 +2020,6 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
             return (
               <article key={r.id} onClick={() => onEdit(r)}
                 className="group relative flex items-start gap-4 rounded-2xl border border-[#E4DFCF] bg-white/70 p-4 hover:shadow-md hover:border-[#8DC48D] transition cursor-pointer">
-                <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition">
-                  <button onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(r.id); }} aria-label={t("delete")}
-                    className="btn-plain text-[#B08A6A] hover:text-[#8a4a3a]">
-                    <TrashIcon />
-                  </button>
-                </div>
                 <RecordIcon record={r} size={56} />
                 <div className="min-w-0 flex-1">
                   <p className="font-display text-base text-[#1B4A38] truncate">{r.cultivar || r.brand}</p>
@@ -2062,21 +2070,6 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
         </div>
       )}
 
-      {confirmDeleteId !== null && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 px-6" onClick={() => setConfirmDeleteId(null)}>
-          <div className="bg-white rounded-3xl border border-[#E4DFCF] p-6 max-w-xs w-full" onClick={(e) => e.stopPropagation()}>
-            <p className="text-sm text-[#2E2A24] mb-5 text-center">{t("delete_confirm_msg")}</p>
-            <div className="flex justify-center gap-3">
-              <button onClick={() => { onDelete(confirmDeleteId); setConfirmDeleteId(null); }} className="btn-danger text-sm px-5 py-2 rounded-full border">
-                {t("delete_yes")}
-              </button>
-              <button onClick={() => setConfirmDeleteId(null)} className="text-sm px-5 py-2 rounded-full border border-[#E4DFCF] text-[#6B6558]">
-                {t("delete_cancel")}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
