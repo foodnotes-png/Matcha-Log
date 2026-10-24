@@ -291,6 +291,7 @@ const STR = {
     status_daySuffix: "天",
     add_purchaseDate: "購入日期（年/月/日）", add_store: "購買商店 / 地點",
     add_price: "價錢",
+    price_na: "不適用", add_priceSource: "來源",
     add_unsealedExpiry: "未開封效期（年/月/日）*",
     add_rating: "評級 *",
     add_notes: "備註（選填）",
@@ -371,6 +372,7 @@ const STR = {
     status_daySuffix: "d",
     add_purchaseDate: "Purchase Date (YYYY/MM/DD)", add_store: "Store / Location",
     add_price: "Price",
+    price_na: "N/A", add_priceSource: "Source",
     add_unsealedExpiry: "Unopened Validity (YYYY/MM/DD) *",
     add_rating: "Rating *",
     add_notes: "Notes (optional)",
@@ -451,6 +453,7 @@ const STR = {
     status_daySuffix: "日",
     add_purchaseDate: "購入日（年/月/日）", add_store: "購入店舗・場所",
     add_price: "価格",
+    price_na: "該当なし", add_priceSource: "入手元",
     add_unsealedExpiry: "未開封賞味期限（年/月/日）*",
     add_rating: "評価 *",
     add_notes: "メモ（任意）",
@@ -531,6 +534,7 @@ const STR = {
     status_daySuffix: "일",
     add_purchaseDate: "구매일（년/월/일）", add_store: "구매처 / 위치",
     add_price: "가격",
+    price_na: "해당 없음", add_priceSource: "출처",
     add_unsealedExpiry: "미개봉 유통기한（년/월/일）*",
     add_rating: "별점 *",
     add_notes: "메모(선택)",
@@ -710,7 +714,13 @@ function NavIcon({ name, active }) {
   }
 }
 
-const CURRENCIES = ["JPY¥", "CNY¥", "GBP£", "HKD$", "KRW₩", "USD$"];
+const PRICE_NA = "不適用";
+const CURRENCIES = ["JPY¥", "CNY¥", "GBP£", "HKD$", "KRW₩", "USD$", PRICE_NA];
+const PRICE_SOURCES = ["親友贈送", "公關邀請/禮物"];
+const PRICE_SOURCE_LABEL = {
+  "親友贈送": { zh: "親友贈送", en: "Gift from friends/family", ja: "家族・友人からの贈り物", ko: "가족·지인 선물" },
+  "公關邀請/禮物": { zh: "公關邀請/禮物", en: "PR invitation / gift", ja: "PRご招待・ギフト", ko: "PR 초대/선물" },
+};
 // Approximate static exchange rates to USD, for comparing prices across currencies.
 // NOTE: this is a fixed reference table baked into the app, not a live/hourly feed —
 // a frontend-only demo has no backend to call a real FX API from.
@@ -723,6 +733,8 @@ const EXCHANGE_RATES_TO_USD = {
   "CNY¥": 1 / 7.2,
 };
 function toUSD(price, currency) {
+  // "不適用" (gifted / not purchased) and empty prices have no comparable value
+  if (currency === PRICE_NA || price === "" || price == null) return null;
   const n = Number(price);
   if (isNaN(n)) return null;
   const rate = EXCHANGE_RATES_TO_USD[currency] ?? 1;
@@ -731,7 +743,7 @@ function toUSD(price, currency) {
 
 const initialForm = {
   photo: null, category: "抹茶", categoryOther: "", brand: "", brandOther: "", origin: "", cultivar: "",
-  purchaseDate: "", store: "", currency: "JPY¥", price: "", initialWeight: "", unsealedExpiry: "",
+  purchaseDate: "", store: "", currency: "JPY¥", price: "", priceSource: "", initialWeight: "", unsealedExpiry: "",
   rating: 0,
   occasions: [], occasionOther: "",
   usage: "", usageOther: "", teaStyle: "", notes: "",
@@ -763,6 +775,7 @@ function recordToForm(r) {
     store: r.store || "",
     currency: r.currency || "JPY¥",
     price: r.price || "",
+    priceSource: r.priceSource || "",
     initialWeight: r.initialWeight || "",
     unsealedExpiry: r.unsealedExpiry || "",
     rating: r.rating || 0,
@@ -1404,7 +1417,14 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
               {Number(liveRecord.initialWeight) > 0 && <ViewField label={t("add_weight")} value={`${liveRecord.initialWeight} g`} />}
               <ViewField label={t("add_purchaseDate")} value={liveRecord.purchaseDate || "—"} />
               <ViewField label={t("add_store")} value={liveRecord.store || "—"} />
-              {liveRecord.price && <ViewField label={t("add_price")} value={`${liveRecord.currency || ""} ${liveRecord.price}`} />}
+              {liveRecord.currency === PRICE_NA ? (
+                <>
+                  <ViewField label={t("add_price")} value={t("price_na")} />
+                  <ViewField label={t("add_priceSource")} value={liveRecord.priceSource ? (PRICE_SOURCE_LABEL[liveRecord.priceSource] ? PRICE_SOURCE_LABEL[liveRecord.priceSource][lang] : liveRecord.priceSource) : "—"} />
+                </>
+              ) : (
+                liveRecord.price && <ViewField label={t("add_price")} value={`${liveRecord.currency || ""} ${liveRecord.price}`} />
+              )}
               <ViewField label={t("add_status")} value={statusText} />
               {liveRecord.status === "未開封" && <ViewField label={t("add_unsealedExpiry")} value={liveRecord.unsealedExpiry || "—"} />}
               {liveRecord.status === "已開封" && <ViewField label={t("add_openedDate")} value={liveRecord.openedDate || "—"} />}
@@ -1476,7 +1496,8 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
       origin: form.origin.trim(),
       cultivar: form.cultivar.trim(),
       store: form.store.trim(),
-      price: form.price === "" ? "" : String(roundG(Number(form.price))),
+      price: form.currency === PRICE_NA || form.price === "" ? "" : String(roundG(Number(form.price))),
+      priceSource: form.currency === PRICE_NA ? form.priceSource : "",
       occasions: finalOccasions,
       usage: finalUsage.trim(),
       teaStyle: form.category === "抹茶" && form.occasions.includes("純飲") ? form.teaStyle : "",
@@ -1604,13 +1625,32 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
             <div className="flex flex-col gap-1">
               <label className="text-xs text-[#8A8371]">{t("add_price")}</label>
               <div className="flex gap-2">
-                <select value={form.currency} onChange={(e) => update("currency", e.target.value)}
-                  className="rounded-lg border border-[#E4DFCF] px-2 py-2 text-sm outline-none focus:border-[#8DC48D] bg-white w-24">
-                  {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                <select value={form.currency}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setForm((f) => ({ ...f, currency: v, price: v === PRICE_NA ? "" : f.price }));
+                  }}
+                  className="rounded-lg border border-[#E4DFCF] px-2 py-2 text-sm outline-none focus:border-[#8DC48D] bg-white w-28">
+                  {CURRENCIES.map((c) => <option key={c} value={c}>{c === PRICE_NA ? t("price_na") : c}</option>)}
                 </select>
-                <input type="number" min={0} step="0.01" value={form.price} onChange={(e) => update("price", e.target.value)}
-                  className="flex-1 rounded-lg border border-[#E4DFCF] px-3 py-2 text-sm outline-none focus:border-[#8DC48D]" />
+                <input type="number" min={0} step="0.01" value={form.price}
+                  disabled={form.currency === PRICE_NA}
+                  onChange={(e) => update("price", e.target.value)}
+                  className="flex-1 min-w-0 rounded-lg border border-[#E4DFCF] px-3 py-2 text-sm outline-none focus:border-[#8DC48D] disabled:bg-[#F1EEE3] disabled:opacity-60 disabled:cursor-not-allowed" />
               </div>
+              {form.currency === PRICE_NA && (
+                <div className="flex flex-col gap-1 mt-2">
+                  <label className="text-xs text-[#8A8371]">{t("add_priceSource")}</label>
+                  <div className="flex flex-wrap gap-2">
+                    {PRICE_SOURCES.map((s) => (
+                      <button key={s} type="button" onClick={() => update("priceSource", form.priceSource === s ? "" : s)}
+                        className={`text-xs px-3 py-1.5 rounded-full border transition ${form.priceSource === s ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+                        {PRICE_SOURCE_LABEL[s][lang]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="md:col-span-2 flex flex-col gap-1">
@@ -2035,7 +2075,13 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
                     {r.teaStyle && <Tag tone="gold">{TEA_STYLE_LABEL[r.teaStyle] ? TEA_STYLE_LABEL[r.teaStyle][lang] : r.teaStyle}</Tag>}
                   </div>
                   <p className="text-[11px] text-[#B0A990] mt-2">
-                    {r.price ? `${r.currency || ""} ${r.price}` : ""}{r.price && r.purchaseDate ? " · " : ""}{r.purchaseDate}
+                    {(() => {
+                      const srcLabel = r.priceSource ? (PRICE_SOURCE_LABEL[r.priceSource] ? PRICE_SOURCE_LABEL[r.priceSource][lang] : r.priceSource) : "";
+                      const priceText = r.currency === PRICE_NA
+                        ? `${t("price_na")}${srcLabel ? ` (${srcLabel})` : ""}`
+                        : (r.price ? `${r.currency || ""} ${r.price}` : "");
+                      return `${priceText}${priceText && r.purchaseDate ? " · " : ""}${r.purchaseDate || ""}`;
+                    })()}
                   </p>
                 </div>
                 <div className="flex flex-col items-end gap-1 shrink-0 pl-2 pt-1 text-right">
