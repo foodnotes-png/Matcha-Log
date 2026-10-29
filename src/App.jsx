@@ -1876,7 +1876,7 @@ function HomeTab({ lang, records, userEmail, nickname, isGuest, onAdd, onGoRecor
               <div key={r.id} className="flex items-start gap-4 rounded-2xl border border-[#E4DFCF] bg-white/70 p-4">
                 <RecordIcon record={r} size={48} />
                 <div className="min-w-0 flex-1">
-                  <p className="font-display text-[15px] text-[#1B4A38] truncate">{r.brand}</p>
+                  <p className="font-display text-[16px] text-[#1B4A38] truncate">{r.brand}</p>
                   <p className="text-[13px] text-[#8A8371] truncate">{r.cultivar || "—"}{Number(r.initialWeight) > 0 ? ` · ${r.initialWeight} g` : ""}</p>
                   <div className="mt-1.5"><Stars value={r.rating} /></div>
                 </div>
@@ -1904,7 +1904,7 @@ function HomeTab({ lang, records, userEmail, nickname, isGuest, onAdd, onGoRecor
               <div key={r.id} className="flex items-start gap-4 rounded-2xl border border-[#E4DFCF] bg-white/70 p-4">
                 <RecordIcon record={r} size={48} />
                 <div className="min-w-0 flex-1">
-                  <p className="font-display text-[15px] text-[#1B4A38] truncate">{r.cultivar || r.brand}</p>
+                  <p className="font-display text-[16px] text-[#1B4A38] truncate">{r.cultivar || r.brand}</p>
                   <p className="text-[13px] text-[#8A8371] truncate">{r.brand}{r.origin ? ` · ${r.origin}` : ""}</p>
                   <div className="mt-1.5"><Stars value={r.rating} /></div>
                 </div>
@@ -2122,7 +2122,7 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
                 className="group relative flex items-start gap-4 rounded-2xl border border-[#E4DFCF] bg-white/70 p-4 hover:shadow-md hover:border-[#8DC48D] transition cursor-pointer">
                 <RecordIcon record={r} size={56} />
                 <div className="min-w-0 flex-1">
-                  <p className="font-display text-[15px] text-[#1B4A38] truncate">{r.cultivar || r.brand}</p>
+                  <p className="font-display text-[16px] text-[#1B4A38] truncate">{r.cultivar || r.brand}</p>
                   <div className="flex items-center gap-1.5 text-[13px] text-[#8A8371] truncate">
                     <span>{r.brand}</span>
                     {r.origin && <span>· {r.origin}</span>}
@@ -2130,7 +2130,7 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
                   <div className="mt-1.5"><Stars value={r.rating} /></div>
                   <div className="flex flex-wrap gap-1.5 mt-2">
                     {r.category && <Tag tone="neutral" style={CATEGORY_TAG_STYLE[r.category]}>{CATEGORY_LABEL[r.category] ? CATEGORY_LABEL[r.category][lang] : r.category}</Tag>}
-                    {(r.occasions || []).map((o) => <Tag key={o} tone="neutral">{OCC_LABEL[o] ? OCC_LABEL[o][lang] : o}</Tag>)}
+                    {(r.occasions || []).slice(0, 2).map((o) => <Tag key={o} tone="neutral">{OCC_LABEL[o] ? OCC_LABEL[o][lang] : o}</Tag>)}
                     {r.usage && <Tag tone="gold">{USAGE_LABEL[r.usage] ? USAGE_LABEL[r.usage][lang] : r.usage}</Tag>}
                     {r.teaStyle && <Tag tone="gold">{TEA_STYLE_LABEL[r.teaStyle] ? TEA_STYLE_LABEL[r.teaStyle][lang] : r.teaStyle}</Tag>}
                   </div>
@@ -2247,7 +2247,7 @@ function ExpiryTab({ lang, records, onUpdate }) {
                 <div className="flex gap-4 items-start">
                   <RecordIcon record={r} size={48} />
                   <div className="min-w-0 flex-1">
-                    <p className="font-display text-[15px] text-[#1B4A38] truncate">{r.cultivar || r.brand}</p>
+                    <p className="font-display text-[16px] text-[#1B4A38] truncate">{r.cultivar || r.brand}</p>
                     <p className="text-[13px] text-[#8A8371] truncate">{r.brand}{r.origin ? ` · ${r.origin}` : ""}</p>
                     <div className="flex flex-wrap gap-1.5 mt-1.5">
                       {r.category && <Tag tone="neutral" style={CATEGORY_TAG_STYLE[r.category]}>{CATEGORY_LABEL[r.category] ? CATEGORY_LABEL[r.category][lang] : r.category}</Tag>}
@@ -2258,7 +2258,7 @@ function ExpiryTab({ lang, records, onUpdate }) {
                         <span className="text-[13px] text-[#45320F]">{t("expiry_dateLabel")} {targetStr}</span>
                       )}
                       {Number(r.initialWeight) > 0 && (
-                        <span className="text-[13px] text-[#B0A990]">{t("weight_remaining")} {computeRemaining(r)}g</span>
+                        <span className="text-[13px] text-[#8A8371]">{t("weight_remaining")} {computeRemaining(r)}g</span>
                       )}
                       {r.openedDate && Number(r.expiryDays) !== 30 && (
                         <span className="text-[13px] text-[#B0A990]">{t("expiry_days")} {r.expiryDays}</span>
@@ -2309,6 +2309,31 @@ function pieGradient(rows) {
     })
     .join(", ");
 }
+// wrap a brand name into lines that fit a given pixel width (13px text); breaks at spaces when possible
+function wrapBrand(name, maxW) {
+  const cw = (c) => (/[\u2e80-\u9fff\uff00-\uffef]/.test(c) ? 13 : 8.5);
+  const lines = [];
+  let cur = "", w = 0;
+  for (const ch of name) {
+    const cwid = cw(ch);
+    if (w + cwid > maxW && cur) {
+      const sp = cur.lastIndexOf(" ");
+      if (sp > 0 && ch !== " ") {
+        lines.push(cur.slice(0, sp));
+        cur = cur.slice(sp + 1);
+        w = [...cur].reduce((a, c) => a + cw(c), 0);
+      } else {
+        lines.push(cur);
+        cur = ""; w = 0;
+      }
+    }
+    if (ch === " " && !cur) continue;
+    cur += ch; w += cwid;
+  }
+  if (cur) lines.push(cur);
+  return lines.length ? lines : [name];
+}
+
 function StatsTab({ lang, records }) {
   const t = (k) => STR[lang][k] ?? k;
   const [periodYear, setPeriodYear] = useState("全部");
@@ -2389,8 +2414,8 @@ function StatsTab({ lang, records }) {
           { label: t("stat_avg"), value: avgRating(filteredRecords) === "—" ? "—" : `${avgRating(filteredRecords)} ★` },
         ].map((s) => (
           <div key={s.label} className="rounded-2xl border border-[#E4DFCF] bg-white/60 px-4 py-4 flex flex-col gap-1">
-            <span className="text-[13px] tracking-wider text-[#8A8371]">{s.label}</span>
-            <span className="font-display text-[13px] md:text-[13px] text-[#2B7056] truncate">{s.value}</span>
+            <span className="text-[16px] tracking-wider text-[#8A8371]">{s.label}</span>
+            <span className="font-display text-[16px] text-[#2B7056] truncate">{s.value}</span>
           </div>
         ))}
       </section>
@@ -2398,12 +2423,15 @@ function StatsTab({ lang, records }) {
       {filteredRecords.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h2 className="font-display text-[15px] text-[#1B4A38] mb-3">{t("stats_brandBreakdown")}</h2>
+            <h2 className="font-display text-[16px] text-[#1B4A38] mb-3">{t("stats_brandBreakdown")}</h2>
             {(() => {
               const maxCount = max(brandRows);
               const niceMax = Math.max(5, Math.ceil(maxCount / 5) * 5);
               const tickCount = 5;
-              const barW = 40, gap = 24, leftPad = 28, topPad = 10, bottomPad = 34, chartH = 140;
+              const barW = 48, gap = 28, leftPad = 32, topPad = 16, chartH = 140;
+              const wrapped = brandRows.map(([n]) => wrapBrand(n, barW + gap - 4));
+              const maxLines = Math.max(1, ...wrapped.map((l) => l.length));
+              const bottomPad = 14 + maxLines * 16 + 6;
               const chartW = brandRows.length * (barW + gap) + gap;
               const svgW = leftPad + chartW;
               const svgH = topPad + chartH + bottomPad;
@@ -2417,7 +2445,7 @@ function StatsTab({ lang, records }) {
                       return (
                         <g key={i}>
                           <line x1={leftPad} y1={y} x2={svgW} y2={y} stroke="#E4DFCF" strokeWidth="1" />
-                          <text x={leftPad - 6} y={y + 3} textAnchor="end" fontSize="9" fill="#8A8371">{val}</text>
+                          <text x={leftPad - 6} y={y + 3} textAnchor="end" fontSize="13" fill="#8A8371">{val}</text>
                         </g>
                       );
                     })}
@@ -2428,9 +2456,9 @@ function StatsTab({ lang, records }) {
                       return (
                         <g key={name}>
                           <rect x={x} y={y} width={barW} height={Math.max(1, barH)} fill="#8DC48D" />
-                          <text x={x + barW / 2} y={y - 4} textAnchor="middle" fontSize="10" fill="#2B7056" fontWeight="600">{count}</text>
-                          <text x={x + barW / 2} y={topPad + chartH + 14} textAnchor="middle" fontSize="9" fill="#6B6558">
-                            {name.length > 6 ? name.slice(0, 5) + "…" : name}
+                          <text x={x + barW / 2} y={y - 4} textAnchor="middle" fontSize="13" fill="#2B7056" fontWeight="600">{count}</text>
+                          <text x={x + barW / 2} y={topPad + chartH + 18} textAnchor="middle" fontSize="13" fill="#6B6558">
+                            {wrapped[i].map((ln, k) => <tspan key={k} x={x + barW / 2} dy={k === 0 ? 0 : 16}>{ln}</tspan>)}
                           </text>
                         </g>
                       );
@@ -2442,7 +2470,7 @@ function StatsTab({ lang, records }) {
             })()}
           </div>
           <div>
-            <h2 className="font-display text-[15px] text-[#1B4A38] mb-3">{t("stats_occasionBreakdown")}</h2>
+            <h2 className="font-display text-[16px] text-[#1B4A38] mb-3">{t("stats_occasionBreakdown")}</h2>
             <div className="flex items-center justify-center gap-6">
               <svg width="128" height="128" viewBox="0 0 128 128" className="shrink-0">
                 {(() => {
@@ -2628,13 +2656,13 @@ function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, 
       </header>
 
       <section className="rounded-3xl border border-[#E4DFCF] bg-white/70 p-6 max-w-xl mb-6">
-        <h2 className="font-display text-[15px] text-[#1B4A38] mb-3">{t("settings_account")}</h2>
+        <h2 className="font-display text-[16px] text-[#1B4A38] mb-3">{t("settings_account")}</h2>
         {isGuest ? (
           <>
             <p className="text-[13px] text-[#6B6558] mb-4">{t("settings_guest_hint")}</p>
             {editingNick ? (
               <div className="flex flex-col gap-3">
-                <label className="text-[13px] text-[#8A8371]">{t("settings_nick_label")}</label>
+                <label className="text-[16px] text-[#8A8371]">{t("settings_nick_label")}</label>
                 <input value={nickDraft} onChange={(e) => setNickDraft(e.target.value)} placeholder="例：抹茶拿鐵愛好者" autoFocus
                   className="rounded-lg border border-[#E4DFCF] px-3 py-2.5 text-[13px] outline-none focus:border-[#8DC48D] focus:ring-2 focus:ring-[#BDDBBD] transition" />
                 <div className="flex gap-2">
@@ -2644,7 +2672,7 @@ function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, 
               </div>
             ) : (
               <>
-                <p className="text-[13px] text-[#1B4A38] font-medium mb-4">{nickname || "訪客"}</p>
+                <p className="text-[16px] text-[#1B4A38] font-medium mb-4">{nickname || "訪客"}</p>
                 <button onClick={() => { setNickDraft(nickname || ""); setEditingNick(true); }} className="text-[13px] px-5 py-2.5 rounded-full border">
                   {t("settings_login_btn")}
                 </button>
@@ -2661,7 +2689,7 @@ function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, 
       </section>
 
       <section className="rounded-3xl border border-[#E4DFCF] bg-white/70 p-6 max-w-xl">
-        <h2 className="font-display text-[15px] text-[#1B4A38] mb-3">{t("settings_language")}</h2>
+        <h2 className="font-display text-[16px] text-[#1B4A38] mb-3">{t("settings_language")}</h2>
         <div className="flex flex-wrap gap-2">
           <button onClick={() => setLang("zh")}
             className={`text-[13px] px-4 py-2 rounded-full border transition ${lang === "zh" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
@@ -2679,7 +2707,7 @@ function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, 
       </section>
 
       <section className="rounded-3xl border border-[#E4DFCF] bg-white/70 p-6 max-w-xl mt-6">
-        <h2 className="font-display text-[15px] text-[#1B4A38] mb-3">{t("settings_data")}</h2>
+        <h2 className="font-display text-[16px] text-[#1B4A38] mb-3">{t("settings_data")}</h2>
         <div className="flex flex-wrap gap-2 mb-4">
           <button onClick={exportData}
             className="text-[13px] px-4 py-2 rounded-full border border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D] transition">
