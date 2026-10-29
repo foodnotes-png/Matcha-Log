@@ -1,0 +1,25 @@
+{
+  "name": "Matcha Log",
+  "short_name": "Matcha Log",
+  "description": "抹茶ログ - 記錄每一碗抹茶的品牌、風味與心情",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#E0EFC8",
+  "theme_color": "#2B7056",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
