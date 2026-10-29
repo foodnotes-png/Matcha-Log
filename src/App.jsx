@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef, useLayoutEffect } from "react";
 
 /* ---------------------------------------------
    design tokens
@@ -24,6 +24,8 @@ const FONT_STYLE = (
     .min-h-screen { min-height: 100vh; min-height: 100dvh; }
     .safe-pb { padding-bottom: env(safe-area-inset-bottom); }
     .safe-pt { padding-top: env(safe-area-inset-top); }
+    .wheel-col { scrollbar-width: none; -ms-overflow-style: none; overscroll-behavior-y: contain; }
+    .wheel-col::-webkit-scrollbar { display: none; }
     /* main scroll area: keep enough room to clear the fixed bottom nav (5rem)
        AND the safe-area inset, additively (a plain pb-20 + safe-pb combo on
        the same element would just overwrite one another instead of adding). */
@@ -254,7 +256,7 @@ const STR = {
     nav_home: "首頁", nav_records: "使用紀錄", nav_expiry: "到期提醒",
     nav_stats: "統計", nav_feedback: "意見", nav_settings: "設定",
     home_welcome: "歡迎回來", home_guest: "訪客模式",
-    home_recent: "最近紀錄", home_viewAll: "查看全部",
+    home_recent: "最近紀錄", home_fav: "我的最愛", home_fav_empty: "尚未標記我的最愛", fav_toggle: "我的最愛", home_viewAll: "查看全部",
     home_addBtn: "＋ 新增紀錄",
     home_empty: "還沒有任何紀錄，開始記下第一碗抹茶吧！",
     stat_total: "總紀錄數", stat_topBrand: "最常喝的品牌",
@@ -264,7 +266,7 @@ const STR = {
     filter_occasion: "用途", filter_rating: "星級", filter_all: "全部",
     filter_category: "類別",
     filter_price: "價錢", price_asc: "由低至高", price_desc: "由高至低",
-    records_totalUsed: "累積使用", records_usageCount: "總使用次數",
+    records_totalUsed: "累積使用", records_usageCount: "總使用次數", records_countUnit: "次",
     usage_earliest: "最早使用", usage_latest: "最近使用", filter_usageDate: "使用日期",
     records_empty: "找不到符合條件的紀錄，換個關鍵字或篩選條件看看。",
     add_title: "新增紀錄", edit_title: "編輯紀錄", add_back: "← 返回",
@@ -312,16 +314,16 @@ const STR = {
     feedback_suggest: "功能建議", feedback_bug: "問題回報", feedback_other: "其他",
     feedback_message: "內容", feedback_message_ph: "請輸入你的意見...",
     feedback_email: "聯絡 Email（選填）", feedback_submit: "送出回饋",
-    feedback_thanks: "感謝你的意見！我們已經收到了。",
+    feedback_thanks: "謝謝你的回饋！", feedback_sending: "傳送中...", feedback_error: "傳送失敗，請檢查網路後再試一次。",
     settings_title: "設定", settings_account: "帳號",
-    settings_guest_hint: "訪客資料僅儲存於這台裝置上，登入後即可在帳號下保存。",
-    settings_login_btn: "登入 / 註冊帳號", settings_logout: "登出",
+    settings_guest_hint: "資料只會儲存於本裝置，一旦清除瀏覽器紀錄或於手機主畫面移除web app，資料會一同清除",
+    settings_login_btn: "修改暱稱", settings_nick_label: "暱稱", settings_nick_save: "儲存", settings_logout: "登出",
     settings_language: "語言設置",
     settings_data: "資料管理",
     settings_export: "匯出全部資料", settings_import: "匯入資料", settings_clear: "清除所有資料",
     settings_clear_confirm: "確定要清除所有紀錄嗎？此操作無法復原。",
     settings_clear_yes: "確認清除",
-    settings_storage_note: "登入帳號後資料會保存在帳號雲端；訪客資料只存在這台裝置",
+    settings_storage_note: "資料只會儲存於本裝置，一旦清除瀏覽器紀錄或於手機主畫面移除web app，資料會一同清除",
     auth_guest: "以訪客身份繼續",
     delete: "刪除紀錄",
     delete_confirm_msg: "刪除後資料無法復原",
@@ -335,7 +337,7 @@ const STR = {
     nav_home: "Home", nav_records: "Records", nav_expiry: "Expiry",
     nav_stats: "Stats", nav_feedback: "Feedback", nav_settings: "Settings",
     home_welcome: "Welcome back", home_guest: "Guest Mode",
-    home_recent: "Recent Records", home_viewAll: "View all",
+    home_recent: "Recent Records", home_fav: "Favorites", home_fav_empty: "No favorites yet", fav_toggle: "Favorite", home_viewAll: "View all",
     home_addBtn: "+ Add Record",
     home_empty: "No records yet — log your first bowl of matcha!",
     stat_total: "Total Records", stat_topBrand: "Top Brand",
@@ -345,7 +347,7 @@ const STR = {
     filter_occasion: "Occasion", filter_rating: "Rating", filter_all: "All",
     filter_category: "Category",
     filter_price: "Price", price_asc: "Low to High", price_desc: "High to Low",
-    records_totalUsed: "Total Used", records_usageCount: "Total Usage Count",
+    records_totalUsed: "Total Used", records_usageCount: "Total Usage Count", records_countUnit: " times",
     usage_earliest: "Earliest Use", usage_latest: "Latest Use", filter_usageDate: "Usage Date",
     records_empty: "No matching records — try a different keyword or filter.",
     add_title: "Add Record", edit_title: "Edit Record", add_back: "← Back",
@@ -393,16 +395,16 @@ const STR = {
     feedback_suggest: "Feature Suggestion", feedback_bug: "Bug Report", feedback_other: "Other",
     feedback_message: "Message", feedback_message_ph: "Tell us what you think...",
     feedback_email: "Contact Email (optional)", feedback_submit: "Submit Feedback",
-    feedback_thanks: "Thanks for your feedback! We've received it.",
+    feedback_thanks: "Thanks for your feedback!", feedback_sending: "Sending...", feedback_error: "Failed to send. Please check your connection and try again.",
     settings_title: "Settings", settings_account: "Account",
-    settings_guest_hint: "Guest data is stored on this device only. Log in to save it to an account.",
-    settings_login_btn: "Log in / Sign up", settings_logout: "Log out",
+    settings_guest_hint: "Data is stored only on this device. If you clear your browser data or remove the web app from your phone's home screen, your data will be erased too.",
+    settings_login_btn: "Edit Nickname", settings_nick_label: "Nickname", settings_nick_save: "Save", settings_logout: "Log out",
     settings_language: "Language",
     settings_data: "Data Management",
     settings_export: "Export All Data", settings_import: "Import Data", settings_clear: "Clear All Data",
     settings_clear_confirm: "Are you sure you want to clear all records? This cannot be undone.",
     settings_clear_yes: "Confirm Clear",
-    settings_storage_note: "Data is saved to your account in the cloud when logged in; guest data stays only on this device.",
+    settings_storage_note: "Data is stored only on this device. If you clear your browser data or remove the web app from your phone's home screen, your data will be erased too.",
     auth_guest: "Continue as Guest",
     delete: "Delete record",
     delete_confirm_msg: "This cannot be undone once deleted",
@@ -416,7 +418,7 @@ const STR = {
     nav_home: "ホーム", nav_records: "記録", nav_expiry: "賞味期限",
     nav_stats: "統計", nav_feedback: "フィードバック", nav_settings: "設定",
     home_welcome: "おかえりなさい", home_guest: "ゲストモード",
-    home_recent: "最近の記録", home_viewAll: "すべて見る",
+    home_recent: "最近の記録", home_fav: "お気に入り", home_fav_empty: "お気に入りはまだありません", fav_toggle: "お気に入り", home_viewAll: "すべて見る",
     home_addBtn: "＋ 記録を追加",
     home_empty: "まだ記録がありません。最初の一杯を記録しましょう！",
     stat_total: "総記録数", stat_topBrand: "よく飲むブランド",
@@ -426,7 +428,7 @@ const STR = {
     filter_occasion: "用途", filter_rating: "評価", filter_all: "すべて",
     filter_category: "種類",
     filter_price: "価格", price_asc: "安い順", price_desc: "高い順",
-    records_totalUsed: "累計使用量", records_usageCount: "総使用回数",
+    records_totalUsed: "累計使用量", records_usageCount: "総使用回数", records_countUnit: "回",
     usage_earliest: "開封が古い順", usage_latest: "開封が新しい順", filter_usageDate: "使用日",
     records_empty: "条件に合う記録が見つかりません。キーワードや条件を変えてみてください。",
     add_title: "記録を追加", edit_title: "記録を編集", add_back: "← 戻る",
@@ -474,16 +476,16 @@ const STR = {
     feedback_suggest: "機能提案", feedback_bug: "不具合報告", feedback_other: "その他",
     feedback_message: "内容", feedback_message_ph: "ご意見をお聞かせください...",
     feedback_email: "連絡先メール（任意）", feedback_submit: "送信する",
-    feedback_thanks: "フィードバックありがとうございます！受け取りました。",
+    feedback_thanks: "フィードバックありがとうございます！", feedback_sending: "送信中...", feedback_error: "送信に失敗しました。接続を確認してもう一度お試しください。",
     settings_title: "設定", settings_account: "アカウント",
-    settings_guest_hint: "ゲストのデータはこの端末にのみ保存されます。ログインするとアカウントに保存できます。",
-    settings_login_btn: "ログイン / 新規登録", settings_logout: "ログアウト",
+    settings_guest_hint: "データはこの端末にのみ保存されます。ブラウザの履歴を消去したり、ホーム画面からWebアプリを削除したりすると、データも一緒に消去されます。",
+    settings_login_btn: "ニックネームを変更", settings_nick_label: "ニックネーム", settings_nick_save: "保存", settings_logout: "ログアウト",
     settings_language: "言語設定",
     settings_data: "データ管理",
     settings_export: "全データを書き出す", settings_import: "データを読み込む", settings_clear: "すべてのデータを削除",
     settings_clear_confirm: "本当にすべての記録を削除しますか？この操作は取り消せません。",
     settings_clear_yes: "削除する",
-    settings_storage_note: "アカウントでログインするとデータはクラウドに保存されます。ゲストのデータはこの端末にのみ保存されます。",
+    settings_storage_note: "データはこの端末にのみ保存されます。ブラウザの履歴を消去したり、ホーム画面からWebアプリを削除したりすると、データも一緒に消去されます。",
     auth_guest: "ゲストとして続ける",
     delete: "記録を削除",
     delete_confirm_msg: "削除すると元に戻せません",
@@ -497,7 +499,7 @@ const STR = {
     nav_home: "홈", nav_records: "기록", nav_expiry: "유통기한",
     nav_stats: "통계", nav_feedback: "피드백", nav_settings: "설정",
     home_welcome: "다시 오신 것을 환영합니다", home_guest: "게스트 모드",
-    home_recent: "최근 기록", home_viewAll: "전체 보기",
+    home_recent: "최근 기록", home_fav: "즐겨찾기", home_fav_empty: "아직 즐겨찾기가 없습니다", fav_toggle: "즐겨찾기", home_viewAll: "전체 보기",
     home_addBtn: "＋ 기록 추가",
     home_empty: "아직 기록이 없습니다. 첫 말차를 기록해보세요!",
     stat_total: "총 기록 수", stat_topBrand: "가장 많이 마신 브랜드",
@@ -507,7 +509,7 @@ const STR = {
     filter_occasion: "용도", filter_rating: "별점", filter_all: "전체",
     filter_category: "종류",
     filter_price: "가격", price_asc: "낮은 가격순", price_desc: "높은 가격순",
-    records_totalUsed: "누적 사용량", records_usageCount: "총 사용 횟수",
+    records_totalUsed: "누적 사용량", records_usageCount: "총 사용 횟수", records_countUnit: "회",
     usage_earliest: "가장 오래 개봉", usage_latest: "가장 최근 개봉", filter_usageDate: "사용일",
     records_empty: "조건에 맞는 기록이 없습니다. 다른 검색어나 필터를 사용해 보세요.",
     add_title: "기록 추가", edit_title: "기록 수정", add_back: "← 뒤로",
@@ -555,16 +557,16 @@ const STR = {
     feedback_suggest: "기능 제안", feedback_bug: "버그 신고", feedback_other: "기타",
     feedback_message: "내용", feedback_message_ph: "의견을 입력해주세요...",
     feedback_email: "연락처 이메일(선택)", feedback_submit: "피드백 보내기",
-    feedback_thanks: "피드백 감사합니다! 잘 받았습니다.",
+    feedback_thanks: "피드백 감사합니다!", feedback_sending: "전송 중...", feedback_error: "전송에 실패했습니다. 연결을 확인하고 다시 시도해 주세요.",
     settings_title: "설정", settings_account: "계정",
-    settings_guest_hint: "게스트 데이터는 이 기기에만 저장됩니다. 로그인하면 계정에 저장할 수 있습니다.",
-    settings_login_btn: "로그인 / 회원가입", settings_logout: "로그아웃",
+    settings_guest_hint: "데이터는 이 기기에만 저장됩니다. 브라우저 기록을 삭제하거나 휴대폰 홈 화면에서 웹 앱을 제거하면 데이터도 함께 삭제됩니다.",
+    settings_login_btn: "닉네임 수정", settings_nick_label: "닉네임", settings_nick_save: "저장", settings_logout: "로그아웃",
     settings_language: "언어 설정",
     settings_data: "데이터 관리",
     settings_export: "전체 데이터 내보내기", settings_import: "데이터 가져오기", settings_clear: "모든 데이터 삭제",
     settings_clear_confirm: "정말로 모든 기록을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
     settings_clear_yes: "삭제 확인",
-    settings_storage_note: "계정으로 로그인하면 데이터가 클라우드에 저장됩니다. 게스트 데이터는 이 기기에만 저장됩니다.",
+    settings_storage_note: "데이터는 이 기기에만 저장됩니다. 브라우저 기록을 삭제하거나 휴대폰 홈 화면에서 웹 앱을 제거하면 데이터도 함께 삭제됩니다.",
     auth_guest: "게스트로 계속하기",
     delete: "기록 삭제",
     delete_confirm_msg: "삭제하면 복구할 수 없습니다",
@@ -743,7 +745,7 @@ function toUSD(price, currency) {
 
 const initialForm = {
   photo: null, category: "抹茶", categoryOther: "", brand: "", brandOther: "", origin: "", cultivar: "",
-  purchaseDate: "", store: "", currency: "JPY¥", price: "", priceSource: "", initialWeight: "", unsealedExpiry: "",
+  purchaseDate: "", store: "", currency: "JPY¥", price: "", priceSource: "", initialWeight: "", unsealedExpiry: "", favorite: false,
   rating: 0,
   occasions: [], occasionOther: "",
   usage: "", usageOther: "", teaStyle: "", notes: "",
@@ -776,6 +778,7 @@ function recordToForm(r) {
     currency: r.currency || "JPY¥",
     price: r.price || "",
     priceSource: r.priceSource || "",
+    favorite: !!r.favorite,
     initialWeight: r.initialWeight || "",
     unsealedExpiry: r.unsealedExpiry || "",
     rating: r.rating || 0,
@@ -804,6 +807,8 @@ function computeRemaining(r) {
 function computeStatus(r) {
   const init = Number(r.initialWeight) || 0;
   if (r.status === "已用完" || (init > 0 && computeRemaining(r) <= 0)) return "已用完";
+  if (r.status === "未開封") return "未開封";
+  if (r.status === "已開封") return "使用中";
   if (r.openedDate) return "使用中";
   return "未開封";
 }
@@ -818,6 +823,30 @@ function usageDateRange(r) {
   const times = dates.map((d) => d.getTime());
   return { earliest: new Date(Math.min(...times)), latest: new Date(Math.max(...times)) };
 }
+function firstUsageDate(r) {
+  let best = null, bestStr = null;
+  (r.usageLog || []).forEach((u) => {
+    const d = parseDMY(u.date);
+    if (d && (!best || d < best)) { best = d; bestStr = u.date; }
+  });
+  return bestStr;
+}
+// When logged usage uses up the whole initial weight, the record's stored status
+// flips to 已用完 (finish date = last usage date). If a later edit/delete of a usage
+// entry leaves grams remaining again, an auto-finished record goes back to 已開封.
+function applyAutoFinish(rec, wasEmpty) {
+  const init = Number(rec.initialWeight) || 0;
+  if (init <= 0) return rec;
+  const remaining = computeRemaining(rec);
+  if (remaining <= 0) {
+    if (rec.status === "已用完") return rec;
+    return { ...rec, status: "已用完", finishedDate: lastUsageDate(rec) || todayDMY(), autoFinished: true };
+  }
+  if (rec.status === "已用完" && (rec.autoFinished || wasEmpty)) {
+    return { ...rec, status: "已開封", finishedDate: "", openedDate: rec.openedDate || firstUsageDate(rec) || todayDMY(), autoFinished: false };
+  }
+  return rec;
+}
 function lastUsageDate(r) {
   let best = null, bestStr = null;
   (r.usageLog || []).forEach((u) => {
@@ -830,25 +859,12 @@ function lastUsageDate(r) {
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /* ================= AUTH SCREEN ================= */
-function AuthScreen({ onLogin, onSignup, onGuest }) {
-  const [mode, setMode] = useState("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+function AuthScreen({ onEnter }) {
   const [nickname, setNickname] = useState("");
-  const [error, setError] = useState("");
-
-  const switchMode = (m) => { setMode(m); setError(""); setPassword(""); };
 
   const submit = (e) => {
     e.preventDefault();
-    setError("");
-    if (!EMAIL_RE.test(email.trim())) { setError("請輸入有效的 email 地址"); return; }
-    if (password.length < 6) { setError("密碼至少需要 6 個字元"); return; }
-    if (mode === "signup") {
-      onSignup(email.trim(), nickname.trim());
-    } else {
-      onLogin(email.trim());
-    }
+    onEnter(nickname.trim() || "訪客");
   };
 
   return (
@@ -862,48 +878,19 @@ function AuthScreen({ onLogin, onSignup, onGuest }) {
         </div>
 
         <div className="rounded-3xl border border-[#E4DFCF] bg-white/70 p-7">
-          <div className="flex gap-2 mb-6">
-            <button type="button" onClick={() => switchMode("login")} style={{ backgroundColor: "#D5F2DB" }}
-              className={`flex-1 text-sm py-2.5 rounded-full transition text-[#1B4A38] ${mode === "login" ? "ring-2 ring-[#2B7056] font-medium" : "opacity-70 hover:opacity-100"}`}>
-              帳號登入
-            </button>
-            <button type="button" onClick={() => switchMode("signup")} style={{ backgroundColor: "#F7F3EB" }}
-              className={`flex-1 text-sm py-2.5 rounded-full transition text-[#6B6558] ${mode === "signup" ? "ring-2 ring-[#2B7056] font-medium text-[#1B4A38]" : "opacity-70 hover:opacity-100"}`}>
-              註冊帳號
-            </button>
-          </div>
-
           <form onSubmit={submit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
-              <label className="text-xs text-[#8A8371]">帳號（電子郵箱）</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com"
-                autoComplete="email" className="rounded-lg border border-[#E4DFCF] px-3 py-2.5 text-sm outline-none focus:border-[#8DC48D] focus:ring-2 focus:ring-[#BDDBBD] transition" />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs text-[#8A8371]">密碼</label>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="至少 6 個字元"
-                autoComplete={mode === "signup" ? "new-password" : "current-password"}
+              <label className="text-xs text-[#8A8371]">暱稱</label>
+              <input value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder="例：抹茶拿鐵愛好者"
                 className="rounded-lg border border-[#E4DFCF] px-3 py-2.5 text-sm outline-none focus:border-[#8DC48D] focus:ring-2 focus:ring-[#BDDBBD] transition" />
             </div>
-            {mode === "signup" && (
-              <div className="flex flex-col gap-1">
-                <label className="text-xs text-[#8A8371]">暱稱</label>
-                <input value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder="例：抹茶拿鐵愛好者"
-                  className="rounded-lg border border-[#E4DFCF] px-3 py-2.5 text-sm outline-none focus:border-[#8DC48D] focus:ring-2 focus:ring-[#BDDBBD] transition" />
-              </div>
-            )}
-            {error && <p className="text-xs text-[#A24B3A] bg-[#F7EAE6] border border-[#EBCFC6] rounded-lg px-3 py-2">{error}</p>}
-            <button type="submit" style={{ backgroundColor: mode === "signup" ? "#F7F3EB" : "#D5F2DB" }}
+            <button type="submit" style={{ backgroundColor: "#D5F2DB" }}
               className="mt-1 rounded-full text-[#1B4A38] font-medium text-sm py-2.5 transition hover:brightness-95">
-              {mode === "signup" ? "註冊成為抹茶の友達！" : "登入"}
+              進入首頁🍵
             </button>
           </form>
-
-          <button onClick={onGuest} className="btn-guest w-full text-center text-xs text-[#8A8371] hover:text-[#2B7056] mt-5 underline underline-offset-2">
-            以訪客身份繼續
-          </button>
         </div>
-        <p className="text-center text-[11px] text-[#B0A990] mt-5">資料只會儲存於本裝置，如需保存資料請登入帳號</p>
+        <p className="text-center text-[11px] text-[#B0A990] mt-5">資料只會儲存於本裝置</p>
       </div>
     </div>
   );
@@ -913,6 +900,57 @@ function AuthScreen({ onLogin, onSignup, onGuest }) {
 const HOURS_24 = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
 const MINUTES_60 = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0"));
 
+const WHEEL_ITEM_H = 36;
+// iOS-style scroll wheel: a snap-scrolling column with the chosen item centred in the band
+function WheelColumn({ items, value, onChange }) {
+  const ref = useRef(null);
+  const timer = useRef(null);
+  const valueRef = useRef(value);
+  const changeRef = useRef(onChange);
+  valueRef.current = value;
+  changeRef.current = onChange;
+
+  useLayoutEffect(() => {
+    if (ref.current) ref.current.scrollTop = Math.max(0, items.indexOf(value)) * WHEEL_ITEM_H;
+    return () => clearTimeout(timer.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const settle = () => {
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => {
+      const el = ref.current;
+      if (!el) return;
+      const i = Math.min(items.length - 1, Math.max(0, Math.round(el.scrollTop / WHEEL_ITEM_H)));
+      if (items[i] !== valueRef.current) changeRef.current(items[i]);
+    }, 90);
+  };
+
+  const pick = (it) => {
+    if (ref.current) ref.current.scrollTo({ top: items.indexOf(it) * WHEEL_ITEM_H, behavior: "smooth" });
+  };
+
+  const mask = "linear-gradient(to bottom, transparent, #000 28%, #000 72%, transparent)";
+  return (
+    <div className="relative" style={{ height: WHEEL_ITEM_H * 5, width: 72 }}>
+      <div className="pointer-events-none absolute left-1 right-1 rounded-lg bg-[#EAF3E8]"
+        style={{ top: WHEEL_ITEM_H * 2, height: WHEEL_ITEM_H }} />
+      <div ref={ref} onScroll={settle} className="wheel-col relative h-full overflow-y-scroll"
+        style={{ scrollSnapType: "y mandatory", WebkitOverflowScrolling: "touch", WebkitMaskImage: mask, maskImage: mask }}>
+        <div style={{ height: WHEEL_ITEM_H * 2 }} />
+        {items.map((it) => (
+          <div key={it} onClick={() => pick(it)}
+            style={{ height: WHEEL_ITEM_H, scrollSnapAlign: "center" }}
+            className={`flex items-center justify-center text-lg tabular-nums cursor-pointer select-none ${it === value ? "text-[#1B4A38] font-medium" : "text-[#B0A990]"}`}>
+            {it}
+          </div>
+        ))}
+        <div style={{ height: WHEEL_ITEM_H * 2 }} />
+      </div>
+    </div>
+  );
+}
+
 function LogUsageScreen({ lang, record, onCancel, onSave }) {
   const t = (k) => STR[lang][k] ?? k;
   const occasionsForCategory = getOccasions(record.category);
@@ -920,6 +958,7 @@ function LogUsageScreen({ lang, record, onCancel, onSave }) {
   const [date, setDate] = useState(todayDMY());
   const [hour, setHour] = useState(nowHM[0]);
   const [minute, setMinute] = useState(nowHM[1]);
+  const [timeOpen, setTimeOpen] = useState(false);
   const [amount, setAmount] = useState("");
   const [purposes, setPurposes] = useState([]);
   const [purposeOther, setPurposeOther] = useState("");
@@ -937,7 +976,7 @@ function LogUsageScreen({ lang, record, onCancel, onSave }) {
   };
 
   const currentRemaining = computeRemaining(record);
-  const previewRemaining = Math.max(0, currentRemaining - (Number(amount) || 0));
+  const previewRemaining = roundG(Math.max(0, currentRemaining - (Number(amount) || 0)));
 
   const submit = () => {
     const dErr = !DATE_RE.test(date.trim());
@@ -982,20 +1021,23 @@ function LogUsageScreen({ lang, record, onCancel, onSave }) {
             </div>
             {dateErr && <p className="text-[11px] text-[#A24B3A] px-4 pt-1">{t("date_err")}</p>}
 
-            <div className="flex items-center justify-between px-4 py-3.5 border-b border-[#F1EEE3]">
-              <div className="flex items-center gap-2 text-sm">
-                <RowIcon name="clock" />
-                <span>{t("weight_useTime")}</span>
+            <div className="border-b border-[#F1EEE3]">
+              <div role="button" tabIndex={0} onClick={() => setTimeOpen((o) => !o)}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setTimeOpen((o) => !o); } }}
+                className="flex items-center justify-between px-4 py-3.5 cursor-pointer select-none">
+                <div className="flex items-center gap-2 text-sm">
+                  <RowIcon name="clock" />
+                  <span>{t("weight_useTime")}</span>
+                </div>
+                <span className={`text-sm tabular-nums ${timeOpen ? "text-[#2B7056] font-medium" : ""}`}>{hour}:{minute}</span>
               </div>
-              <div className="flex items-center gap-1">
-                <select value={hour} onChange={(e) => setHour(e.target.value)} className="text-sm text-right bg-transparent outline-none">
-                  {HOURS_24.map((h) => <option key={h} value={h}>{h}</option>)}
-                </select>
-                <span>:</span>
-                <select value={minute} onChange={(e) => setMinute(e.target.value)} className="text-sm text-right bg-transparent outline-none">
-                  {MINUTES_60.map((m) => <option key={m} value={m}>{m}</option>)}
-                </select>
-              </div>
+              {timeOpen && (
+                <div className="flex items-center justify-center gap-1 pb-3">
+                  <WheelColumn items={HOURS_24} value={hour} onChange={setHour} />
+                  <span className="text-xl text-[#8A8371]">:</span>
+                  <WheelColumn items={MINUTES_60} value={minute} onChange={setMinute} />
+                </div>
+              )}
             </div>
 
             <div className="flex items-center justify-between px-4 py-3.5 border-b border-[#F1EEE3]">
@@ -1100,6 +1142,7 @@ function UsageLogItem({ lang, entry, category, onSave, onDelete }) {
   const [date, setDate] = useState(entry.date || todayDMY());
   const [hour, setHour] = useState(entryHM[0]);
   const [minute, setMinute] = useState(entryHM[1]);
+  const [timeOpen, setTimeOpen] = useState(false);
   const [amount, setAmount] = useState(entry.amount);
   const entryPurposes = entry.purposes || (entry.purpose ? [entry.purpose] : []);
   const [purposes, setPurposes] = useState(entryPurposes);
@@ -1120,7 +1163,7 @@ function UsageLogItem({ lang, entry, category, onSave, onDelete }) {
 
   if (!editing) {
     return (
-      <div className="flex flex-col text-xs text-[#6B6558] border-b border-[#F1EEE3] pb-1.5 gap-0.5">
+      <div className="flex flex-col text-sm text-[#6B6558] border-b border-[#F1EEE3] pb-1.5 gap-0.5">
         <div className="flex justify-between items-center">
           <span>{entry.time ? `${entry.date} ${entry.time}` : entry.date}</span>
           <div className="flex items-center gap-2">
@@ -1149,46 +1192,47 @@ function UsageLogItem({ lang, entry, category, onSave, onDelete }) {
     onSave(entry.id, {
       date: date.trim(), time: `${hour}:${minute}`, amount: roundG(amt), purposes: finalPurposes,
       teaStyle: showTeaStyle ? teaStyle : "", usage: finalUsage.trim(), note: note.trim(),
-    });
+    });    setEditing(false);
   };
 
   return (
     <div className="flex flex-col gap-2 border-b border-[#F1EEE3] pb-3">
       <div className="flex flex-col gap-1">
         <input value={date} onChange={(e) => setDate(formatDMYInput(e.target.value))} placeholder="例：2026/01/01"
-          className={`rounded-lg border px-2 py-1.5 text-xs outline-none ${dateErr ? "border-[#D98C7A]" : "border-[#E4DFCF]"}`} />
-        {dateErr && <p className="text-[10px] text-[#A24B3A]">{t("date_err")}</p>}
+          className={`rounded-lg border px-2 py-1.5 text-sm outline-none ${dateErr ? "border-[#D98C7A]" : "border-[#E4DFCF]"}`} />
+        {dateErr && <p className="text-sm text-[#A24B3A]">{t("date_err")}</p>}
       </div>
       <div className="flex gap-2 items-center">
-        <select value={hour} onChange={(e) => setHour(e.target.value)} className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-xs outline-none bg-white">
-          {HOURS_24.map((h) => <option key={h} value={h}>{h}</option>)}
-        </select>
-        <span className="text-[#8A8371]">:</span>
-        <select value={minute} onChange={(e) => setMinute(e.target.value)} className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-xs outline-none bg-white">
-          {MINUTES_60.map((m) => <option key={m} value={m}>{m}</option>)}
-        </select>
+        <button type="button" onClick={() => setTimeOpen((o) => !o)} className={`btn-plain rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-sm tabular-nums bg-white ${timeOpen ? "text-[#2B7056] font-medium" : ""}`}>{hour}:{minute}</button>
         <div className="relative flex-1">
           <input type="number" min={0} step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)}
-            className="w-full rounded-lg border border-[#E4DFCF] pl-2 pr-6 py-1.5 text-xs outline-none" />
-          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-[#B0A990]">g</span>
+            className="w-full rounded-lg border border-[#E4DFCF] pl-2 pr-6 py-1.5 text-sm outline-none" />
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-[#B0A990]">g</span>
         </div>
       </div>
+      {timeOpen && (
+        <div className="flex items-center justify-center gap-1">
+          <WheelColumn items={HOURS_24} value={hour} onChange={setHour} />
+          <span className="text-xl text-[#8A8371]">:</span>
+          <WheelColumn items={MINUTES_60} value={minute} onChange={setMinute} />
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-1.5">
         {occasionsForCategory.map((o) => (
           <button key={o} type="button" onClick={() => togglePurpose(o)}
-            className={`text-xs px-3 py-1 rounded-full border transition ${purposes.includes(o) ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558]"}`}>
+            className={`text-sm px-3 py-1 rounded-full border transition ${purposes.includes(o) ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558]"}`}>
             {OCC_LABEL[o][lang]}
           </button>
         ))}
       </div>
       {purposes.includes("其他") && (
         <input value={purposeOther} onChange={(e) => setPurposeOther(e.target.value)} placeholder={t("add_occasion_other_ph")}
-          className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-xs outline-none" />
+          className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-sm outline-none" />
       )}
 
       {showTeaStyle && (
-        <select value={teaStyle} onChange={(e) => setTeaStyle(e.target.value)} className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-xs outline-none bg-white">
+        <select value={teaStyle} onChange={(e) => setTeaStyle(e.target.value)} className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-sm outline-none bg-white">
           <option value="" disabled>{t("add_category_ph")}</option>
           {TEA_STYLES.map((s) => <option key={s} value={s}>{TEA_STYLE_LABEL[s][lang]}</option>)}
         </select>
@@ -1196,26 +1240,26 @@ function UsageLogItem({ lang, entry, category, onSave, onDelete }) {
 
       {isPresetUsage ? (
         <>
-          <select value={usage} onChange={(e) => setUsage(e.target.value)} className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-xs outline-none bg-white">
+          <select value={usage} onChange={(e) => setUsage(e.target.value)} className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-sm outline-none bg-white">
             <option value="" disabled>{t("add_usage_ph")}</option>
             {USAGE_PRESET.map((u) => <option key={u} value={u}>{USAGE_LABEL[u][lang]}</option>)}
             <option value="其他">{USAGE_LABEL["其他"][lang]}</option>
           </select>
           {usage === "其他" && (
             <input value={usageOther} onChange={(e) => setUsageOther(e.target.value)} placeholder={t("add_usage_other_ph")}
-              className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-xs outline-none" />
+              className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-sm outline-none" />
           )}
         </>
       ) : (
         <input value={usageOther} onChange={(e) => setUsageOther(e.target.value)} placeholder={t("add_usage_other_ph")}
-          className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-xs outline-none" />
+          className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-sm outline-none" />
       )}
 
       <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder={t("weight_note")}
-        className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-xs outline-none resize-none" />
+        className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-sm outline-none resize-none" />
       <div className="flex justify-end gap-2">
-        <button onClick={() => setEditing(false)} className="text-xs px-3 py-1 rounded-full">{t("add_cancel")}</button>
-        <button onClick={submit} className="text-xs px-3 py-1 rounded-full bg-[#EAF3E8]">{t("action_save")}</button>
+        <button onClick={() => setEditing(false)} className="text-sm px-3 py-1 rounded-full">{t("add_cancel")}</button>
+        <button onClick={submit} className="text-sm px-3 py-1 rounded-full bg-[#EAF3E8]">{t("action_save")}</button>
       </div>
     </div>
   );
@@ -1233,25 +1277,36 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
   const [screenMode, setScreenMode] = useState(initialRecord ? "view" : "edit"); // "view" | "edit"
   const [confirmDelete, setConfirmDelete] = useState(false);
   const update = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+  // no more usage can be added once the record is 已用完 or has 0g left
+  const canAddUsage = !!liveRecord && liveRecord.status !== "已用完" && !(Number(liveRecord.initialWeight) > 0 && computeRemaining(liveRecord) <= 0);
+
+  // usage logging can flip the status (用完 / 回復使用中); mirror that into the edit form
+  const applyLive = (updated) => {
+    const statusChanged = liveRecord && updated.status !== liveRecord.status;
+    setLiveRecord(updated);
+    if (statusChanged) {
+      setForm((f) => ({ ...f, status: updated.status, finishedDate: updated.finishedDate || "", openedDate: updated.openedDate || f.openedDate }));
+    }
+  };
 
   const saveUsageEntry = (entry) => {
-    if (!liveRecord) return;
+    if (!liveRecord || !canAddUsage) return;
     const updated = onLogUsage(liveRecord.id, entry);
-    if (updated) setLiveRecord(updated);
+    if (updated) applyLive(updated);
     setSubScreen("main");
   };
 
   const saveUsageEdit = (entryId, patch) => {
     if (!liveRecord) return;
     const updated = onUpdateUsage(liveRecord.id, entryId, patch);
-    if (updated) setLiveRecord(updated);
+    if (updated) applyLive(updated);
     setEditingUsageId(null);
   };
 
   const removeUsageEntry = (entryId) => {
     if (!liveRecord) return;
     const updated = onDeleteUsage(liveRecord.id, entryId);
-    if (updated) setLiveRecord(updated);
+    if (updated) applyLive(updated);
     setEditingUsageId(null);
   };
 
@@ -1322,7 +1377,7 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
 
   const weightSection = liveRecord && Number(liveRecord.initialWeight) > 0 && (
     <div className="mt-6 pt-6 border-t border-[#E4DFCF]">
-      <h2 className="font-display text-base text-[#1B4A38] mb-4">{t("weight_remaining")}</h2>
+      <h2 className="font-display text-sm text-[#1B4A38] mb-4">{t("weight_remaining")}</h2>
       {(() => {
         const initW = Number(liveRecord.initialWeight) || 0;
         const remaining = computeRemaining(liveRecord);
@@ -1332,8 +1387,8 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
             <div className="w-28 h-28 rounded-full shrink-0 relative"
               style={{ background: `conic-gradient(#8DC48D 0% ${100 - usedPct}%, #E4DFCF ${100 - usedPct}% 100%)` }}>
               <div className="absolute inset-3 rounded-full bg-white flex flex-col items-center justify-center">
-                <span className="font-display text-lg text-[#2B7056]">{remaining}g</span>
-                <span className="text-[10px] text-[#B0A990]">/ {initW}g</span>
+                <span className="font-display text-sm text-[#2B7056]">{remaining}g</span>
+                <span className="text-sm text-[#B0A990]">/ {initW}g</span>
               </div>
             </div>
             {remaining <= 0 && (
@@ -1347,14 +1402,14 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
         <button onClick={() => setShowUsageLog((v) => !v)} className="btn-brown text-sm px-4 py-2 rounded-full border">
           {t("weight_log")}
         </button>
-        <button onClick={() => setSubScreen("logUsage")} className="text-sm px-4 py-2 rounded-full border">
+        <button onClick={() => canAddUsage && setSubScreen("logUsage")} disabled={!canAddUsage} className="text-sm px-4 py-2 rounded-full border disabled:opacity-40 disabled:cursor-not-allowed">
           {t("weight_add")}
         </button>
       </div>
 
       {showUsageLog && (
         (liveRecord.usageLog || []).length === 0 ? (
-          <p className="text-xs text-[#8A8371]">{t("weight_empty")}</p>
+          <p className="text-sm text-[#8A8371]">{t("weight_empty")}</p>
         ) : (
           <div className="flex flex-col gap-2">
             {[...liveRecord.usageLog].reverse().map((u) => (
@@ -1381,26 +1436,27 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
         {FONT_STYLE}
         <header className="max-w-2xl mx-auto px-6 pt-10 pb-6">
           <div className="flex items-start justify-between">
-            <button onClick={onCancel} className="btn-plain text-xs text-[#6B6558] hover:text-[#2B7056] flex items-center gap-1">
+            <button onClick={onCancel} className="btn-plain text-sm text-[#6B6558] hover:text-[#2B7056] flex items-center gap-1">
               {t("add_back")}
             </button>
             <div className="flex flex-col items-end gap-2">
-              <button onClick={() => setScreenMode("edit")} className="text-xs px-4 py-1.5 rounded-full border flex items-center gap-1.5">
+              <button onClick={() => setScreenMode("edit")} className="text-sm px-4 py-1.5 rounded-full border flex items-center gap-1.5">
                 <EditIcon size={12} /> {t("action_edit")}
               </button>
-              <button onClick={() => setConfirmDelete(true)} className="btn-danger text-xs px-4 py-1.5 rounded-full border flex items-center gap-1.5">
+              <button onClick={() => setConfirmDelete(true)} className="btn-danger text-sm px-4 py-1.5 rounded-full border flex items-center gap-1.5">
                 <TrashIcon size={12} /> {t("delete")}
               </button>
             </div>
           </div>
-          <button onClick={() => setSubScreen("logUsage")} className="mt-3 text-sm px-4 py-2 rounded-full border">
+          <button onClick={() => canAddUsage && setSubScreen("logUsage")} disabled={!canAddUsage} className="mt-3 text-sm px-4 py-2 rounded-full border disabled:opacity-40 disabled:cursor-not-allowed">
             {t("weight_add")}
           </button>
           <div className="mt-5 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
         </header>
 
         <main className="max-w-2xl mx-auto px-6 pb-24">
-          <section className="rounded-3xl border border-[#E4DFCF] bg-white/70 p-6">
+          <section className="relative rounded-3xl border border-[#E4DFCF] bg-white/70 p-6">
+            {liveRecord.favorite && <span className="absolute top-4 right-4"><FavStar on size={22} /></span>}
             <div className="flex flex-col items-center text-center mb-5">
               {liveRecord.photo ? (
                 <img src={liveRecord.photo} alt="" className="w-16 h-16 rounded-full object-cover border border-[#E4DFCF]" />
@@ -1409,7 +1465,7 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px]">
+            <div className="flex flex-col divide-y divide-[#E4DFCF]">
               <ViewField label={t("add_category")} value={CATEGORY_LABEL[liveRecord.category] ? CATEGORY_LABEL[liveRecord.category][lang] : liveRecord.category} />
               <ViewField label={t("add_brand")} value={liveRecord.brand} />
               <ViewField label={t("add_origin")} value={liveRecord.origin || "—"} />
@@ -1430,13 +1486,13 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
               {liveRecord.status === "已開封" && <ViewField label={t("add_openedDate")} value={liveRecord.openedDate || "—"} />}
               {liveRecord.status === "已開封" && <ViewField label={t("add_expiryDays")} value={`${liveRecord.expiryDays || 30}`} />}
               {liveRecord.status === "已用完" && <ViewField label={t("add_finishedDate")} value={liveRecord.finishedDate || lastUsageDate(liveRecord) || "—"} />}
-              <div className="flex flex-col gap-1">
-                <label className="text-xs text-[#8A8371]">{t("add_rating")}</label>
-                <div className="py-2"><Stars value={liveRecord.rating} size={18} /></div>
+              <div className="flex items-center justify-between gap-4 text-sm py-3">
+                <span className="shrink-0 text-[#8A8371]">{t("add_rating")}</span>
+                <Stars value={liveRecord.rating} size={14} />
               </div>
-              <div className="md:col-span-2 flex flex-col gap-1">
-                <label className="text-xs text-[#8A8371]">{t("add_occasion")}</label>
-                <div className="flex flex-wrap gap-1.5 py-1">
+              <div className="flex items-center justify-between gap-4 text-sm py-3">
+                <span className="shrink-0 text-[#8A8371]">{t("add_occasion")}</span>
+                <div className="flex flex-wrap justify-end gap-1.5">
                   {(liveRecord.occasions || []).map((o) => <Tag key={o}>{OCC_LABEL[o] ? OCC_LABEL[o][lang] : o}</Tag>)}
                 </div>
               </div>
@@ -1487,10 +1543,13 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
     const finalOccasions = form.occasions.map((o) => (o === "其他" ? (form.occasionOther.trim() || "其他") : o));
     const finalUsage = isPresetUsage ? (form.usage === "其他" ? form.usageOther : form.usage) : form.usageOther;
 
-    onSave({
+    const payload = {
       ...form,
       id: initialRecord ? initialRecord.id : Date.now(),
       usageLog: (liveRecord && liveRecord.usageLog) || (initialRecord && initialRecord.usageLog) || [],
+      autoFinished: !!(liveRecord && liveRecord.autoFinished && form.status === "已用完"),
+      openedDate: form.status === "未開封" ? "" : form.openedDate,
+      finishedDate: form.status === "已用完" ? form.finishedDate : "",
       category: finalCategory,
       brand: finalBrand,
       origin: form.origin.trim(),
@@ -1498,11 +1557,34 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
       store: form.store.trim(),
       price: form.currency === PRICE_NA || form.price === "" ? "" : String(roundG(Number(form.price))),
       priceSource: form.currency === PRICE_NA ? form.priceSource : "",
+      favorite: !!form.favorite,
       occasions: finalOccasions,
       usage: finalUsage.trim(),
       teaStyle: form.category === "抹茶" && form.occasions.includes("純飲") ? form.teaStyle : "",
       notes: form.notes.trim(),
-    });
+    };
+    if (initialRecord) {
+      // editing an existing record: save, then return to its read-only view with the new data
+      onSave(payload, true);
+      setLiveRecord(payload);
+      setForm(recordToForm(payload));
+      setScreenMode("view");
+      if (typeof window !== "undefined") window.scrollTo(0, 0);
+    } else {
+      onSave(payload);
+    }
+  };
+
+  const cancelEdit = () => {
+    if (initialRecord) {
+      // discard unsaved changes and go back to the record's read-only view
+      setForm(recordToForm(liveRecord || initialRecord));
+      setDateErr({ purchase: false, unsealed: false, opened: false, finished: false });
+      setScreenMode("view");
+      if (typeof window !== "undefined") window.scrollTo(0, 0);
+    } else {
+      onCancel();
+    }
   };
 
   return (
@@ -1525,7 +1607,9 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
       </header>
 
       <main className="max-w-2xl mx-auto px-6 pb-24">
-        <section className="rounded-3xl border border-[#E4DFCF] bg-white/70 p-6">
+        <section className="relative rounded-3xl border border-[#E4DFCF] bg-white/70 p-6">
+          <button type="button" onClick={() => update("favorite", !form.favorite)} aria-label={t("fav_toggle")} aria-pressed={!!form.favorite}
+            className="btn-plain absolute top-4 right-4 p-1"><FavStar on={!!form.favorite} size={24} /></button>
           {/* photo — always centered, for both add and edit */}
           <div className="flex flex-col items-center text-center mb-5 gap-4">
             {form.photo ? (
@@ -1782,7 +1866,7 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
           {weightSection}
 
           <div className="flex justify-end gap-2 mt-6">
-            <button onClick={onCancel} className="text-sm px-4 py-2 rounded-full text-[#6B6558] hover:bg-[#F1EEE3] transition">{t("add_cancel")}</button>
+            <button onClick={cancelEdit} className="text-sm px-4 py-2 rounded-full text-[#6B6558] hover:bg-[#F1EEE3] transition">{t("add_cancel")}</button>
             <button onClick={submit} disabled={!brandValid || !occasionValid || form.rating === 0 ||
               (form.status === "未開封" && !form.unsealedExpiry.trim()) ||
               (form.status === "已開封" && !form.openedDate.trim()) ||
@@ -1799,6 +1883,14 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
   );
 }
 
+function FavStar({ on, size = 22 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={on ? "#C9A227" : "none"} stroke={on ? "#C9A227" : "#8A8371"} strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.3 1.1 6.1L12 17l-5.4 3 1.1-6.1L3.2 9.6l6.1-.8L12 3.2z" />
+    </svg>
+  );
+}
+
 /* ================= TAG helpers ================= */
 function Tag({ children, tone = "green" }) {
   const tones = {
@@ -1809,9 +1901,9 @@ function Tag({ children, tone = "green" }) {
 }
 function ViewField({ label, value }) {
   return (
-    <div className="flex flex-col gap-1">
-      <label className="text-xs text-[#8A8371]">{label}</label>
-      <p className="text-sm text-[#2E2A24] py-[5.6px] break-words">{value}</p>
+    <div className="flex items-baseline justify-between gap-4 text-sm py-3">
+      <span className="shrink-0 text-[#8A8371]">{label}</span>
+      <span className="text-[#2E2A24] font-semibold text-right break-words min-w-0">{value}</span>
     </div>
   );
 }
@@ -1825,7 +1917,7 @@ function HomeTab({ lang, records, userEmail, nickname, isGuest, onAdd, onGoRecor
       <header className="pt-10 pb-6">
         <p className="text-sm text-[#8A8371]">{t("home_welcome")}</p>
         <h1 className="font-display text-2xl md:text-3xl text-[#1B4A38] font-700 mt-1">
-          {isGuest ? t("home_guest") : (nickname || userEmail)}
+          {nickname || (isGuest ? t("home_guest") : userEmail)}
         </h1>
         <p className="mt-2 text-sm text-[#6B6558]">{t("tagline")}</p>
         <button onClick={onAdd} className="mt-4 rounded-full bg-[#2B7056] hover:bg-[#1B4A38] text-white text-sm px-5 py-2.5 transition">
@@ -1833,6 +1925,26 @@ function HomeTab({ lang, records, userEmail, nickname, isGuest, onAdd, onGoRecor
         </button>
         <div className="mt-6 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
       </header>
+
+      <div className="mb-8">
+        <h2 className="font-display text-lg text-[#1B4A38] mb-3">{t("home_fav")}</h2>
+        {records.filter((r) => r.favorite).length === 0 ? (
+          <p className="text-sm text-[#8A8371] py-4 text-center">{t("home_fav_empty")}</p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {records.filter((r) => r.favorite).map((r) => (
+              <div key={r.id} className="flex items-start gap-4 rounded-2xl border border-[#E4DFCF] bg-white/70 p-4">
+                <RecordIcon record={r} size={48} />
+                <div className="min-w-0 flex-1">
+                  <p className="font-display text-sm text-[#1B4A38] truncate">{r.brand}</p>
+                  <p className="text-xs text-[#8A8371] truncate">{r.cultivar || "—"}{Number(r.initialWeight) > 0 ? ` · ${r.initialWeight} g` : ""}</p>
+                  <div className="mt-1.5"><Stars value={r.rating} /></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <div className="flex items-center justify-between mb-3">
         <h2 className="font-display text-lg text-[#1B4A38]">{t("home_recent")}</h2>
@@ -1927,7 +2039,7 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
     : OCCASIONS.filter((o) => !LATTE_LABELS.includes(o));
 
   const totalUsedGrams = useMemo(
-    () => records.reduce((sum, r) => sum + (r.usageLog || []).reduce((s, u) => s + (Number(u.amount) || 0), 0), 0),
+    () => roundG(records.reduce((sum, r) => sum + (r.usageLog || []).reduce((s, u) => s + (Number(u.amount) || 0), 0), 0)),
     [records]
   );
   const totalUsageCount = useMemo(() => records.reduce((sum, r) => sum + (r.usageLog || []).length, 0), [records]);
@@ -1964,7 +2076,8 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
       });
       return [...withPrice, ...withoutPrice];
     }
-    return base.sort((a, b) => b.id - a.id);
+    const rank = { "使用中": 0, "未開封": 1, "已用完": 2 };
+    return base.sort((a, b) => (rank[computeStatus(a)] - rank[computeStatus(b)]) || (b.id - a.id));
   }, [records, search, categoryFilter, occFilter, priceSort, usageSort, statusFilter]);
 
   return (
@@ -1986,7 +2099,7 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
         </div>
         <div className="rounded-2xl border border-[#E4DFCF] bg-white/60 px-4 py-3 flex flex-col gap-0.5">
           <span className="text-[11px] tracking-wider text-[#8A8371]">{t("records_usageCount")}</span>
-          <span className="font-display text-lg text-[#2B7056]">{totalUsageCount}</span>
+          <span className="font-display text-lg text-[#2B7056]">{totalUsageCount}{t("records_countUnit")}</span>
         </div>
       </section>
 
@@ -2437,12 +2550,42 @@ function FeedbackTab({ lang }) {
   const [message, setMessage] = useState("");
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [failed, setFailed] = useState(false);
 
-  const submit = () => {
-    if (!message.trim()) return;
-    setSent(true);
-    setMessage("");
-    setEmail("");
+  // Google Form 設定（類型 / 內容 / 聯絡 Email）
+  const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdBFRy7MJCZNz5XnePmDXZB_HiU2GWcBr8A_2BDn16NNp_vfQ/formResponse";
+  const ENTRY_CATEGORY = "entry.398945593";
+  const ENTRY_MESSAGE = "entry.1921811668";
+  const ENTRY_EMAIL = "entry.753501976";
+  // 送出給表單的「類型」文字（需與 Google Form 的選項文字一致）
+  const CATEGORY_VALUE = { suggest: "功能建議", bug: "問題回報", other: "其他" };
+
+  const submit = async () => {
+    if (sending || !message.trim()) return;
+    setSending(true);
+    setSent(false);
+    setFailed(false);
+    try {
+      const body = new URLSearchParams();
+      body.append(ENTRY_CATEGORY, CATEGORY_VALUE[cat] || cat);
+      body.append(ENTRY_MESSAGE, message.trim());
+      body.append(ENTRY_EMAIL, email.trim());
+      await fetch(FORM_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: body.toString(),
+      });
+      setSent(true);
+      setCat("suggest");
+      setMessage("");
+      setEmail("");
+    } catch (err) {
+      setFailed(true);
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -2455,6 +2598,9 @@ function FeedbackTab({ lang }) {
       <section className="rounded-3xl border border-[#E4DFCF] bg-white/70 p-6 max-w-xl">
         {sent && (
           <p className="text-xs text-[#2B7056] bg-[#EAF3E8] border border-[#BDDBBD] rounded-lg px-3 py-2 mb-4">{t("feedback_thanks")}</p>
+        )}
+        {failed && (
+          <p className="text-xs text-[#A24B3A] bg-[#F7EAE6] border border-[#EBCFC6] rounded-lg px-3 py-2 mb-4">{t("feedback_error")}</p>
         )}
         <div className="flex flex-col gap-1 mb-4">
           <label className="text-xs text-[#8A8371]">{t("feedback_category")}</label>
@@ -2477,9 +2623,9 @@ function FeedbackTab({ lang }) {
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com"
             className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-sm outline-none focus:border-[#8DC48D]" />
         </div>
-        <button onClick={submit} disabled={!message.trim()}
+        <button onClick={submit} disabled={sending || !message.trim()}
           className="rounded-full bg-[#2B7056] text-white text-sm px-5 py-2.5 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#1B4A38] transition">
-          {t("feedback_submit")}
+          {sending ? t("feedback_sending") : t("feedback_submit")}
         </button>
       </section>
     </div>
@@ -2487,8 +2633,10 @@ function FeedbackTab({ lang }) {
 }
 
 /* ================= SETTINGS TAB ================= */
-function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, onLogout, records, setRecords }) {
+function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, onLogout, onSetNickname, records, setRecords }) {
   const t = (k) => STR[lang][k] ?? k;
+  const [editingNick, setEditingNick] = useState(false);
+  const [nickDraft, setNickDraft] = useState("");
   const [confirmClear, setConfirmClear] = useState(false);
 
   const exportData = () => {
@@ -2537,9 +2685,24 @@ function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, 
         {isGuest ? (
           <>
             <p className="text-xs text-[#6B6558] mb-4">{t("settings_guest_hint")}</p>
-            <button onClick={onGoToAuth} className="rounded-full bg-[#2B7056] hover:bg-[#1B4A38] text-white text-sm px-5 py-2.5 transition">
-              {t("settings_login_btn")}
-            </button>
+            {editingNick ? (
+              <div className="flex flex-col gap-3">
+                <label className="text-xs text-[#8A8371]">{t("settings_nick_label")}</label>
+                <input value={nickDraft} onChange={(e) => setNickDraft(e.target.value)} placeholder="例：抹茶拿鐵愛好者" autoFocus
+                  className="rounded-lg border border-[#E4DFCF] px-3 py-2.5 text-sm outline-none focus:border-[#8DC48D] focus:ring-2 focus:ring-[#BDDBBD] transition" />
+                <div className="flex gap-2">
+                  <button onClick={() => { onSetNickname(nickDraft.trim() || "訪客"); setEditingNick(false); }} className="btn-brown text-sm px-5 py-2 rounded-full border">{t("settings_nick_save")}</button>
+                  <button onClick={() => setEditingNick(false)} className="text-sm px-5 py-2 rounded-full border">{t("add_cancel")}</button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm text-[#1B4A38] font-medium mb-4">{nickname || "訪客"}</p>
+                <button onClick={() => { setNickDraft(nickname || ""); setEditingNick(true); }} className="text-sm px-5 py-2.5 rounded-full border">
+                  {t("settings_login_btn")}
+                </button>
+              </>
+            )}
           </>
         ) : (
           <>
@@ -2564,10 +2727,6 @@ function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, 
           <button onClick={() => setLang("ja")}
             className={`text-sm px-4 py-2 rounded-full border transition ${lang === "ja" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
             日本語
-          </button>
-          <button onClick={() => setLang("ko")}
-            className={`text-sm px-4 py-2 rounded-full border transition ${lang === "ko" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
-            한국어
           </button>
         </div>
       </section>
@@ -2608,15 +2767,12 @@ function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, 
         )}
       </section>
 
-      <p className="text-center text-[11px] text-[#B0A990] mt-6">
-        {t("settings_storage_note")}
-      </p>
     </div>
   );
 }
 
 /* ================= MAIN APP (bottom nav host) ================= */
-function MatchaApp({ lang, setLang, records, setRecords, userEmail, nickname, isGuest, onGoToAuth, onLogout }) {
+function MatchaApp({ lang, setLang, records, setRecords, userEmail, nickname, isGuest, onGoToAuth, onLogout, onSetNickname }) {
   const t = (k) => STR[lang][k] ?? k;
   const [tab, setTab] = useState("home");
   const [screen, setScreen] = useState("main"); // "main" | "form"
@@ -2626,8 +2782,9 @@ function MatchaApp({ lang, setLang, records, setRecords, userEmail, nickname, is
   const openEdit = (r) => { setEditingRecord(r); setScreen("form"); };
   const closeForm = () => { setEditingRecord(null); setScreen("main"); };
 
-  const saveRecord = (rec) => {
+  const saveRecord = (rec, stay) => {
     setRecords((rs) => (rs.some((r) => r.id === rec.id) ? rs.map((r) => (r.id === rec.id ? rec : r)) : [rec, ...rs]));
+    if (stay) { setEditingRecord(rec); return; }
     setEditingRecord(null);
     setScreen("main");
   };
@@ -2636,21 +2793,21 @@ function MatchaApp({ lang, setLang, records, setRecords, userEmail, nickname, is
   const logUsage = (id, entry) => {
     const rec = records.find((r) => r.id === id);
     if (!rec) return null;
-    const updated = { ...rec, usageLog: [...(rec.usageLog || []), { id: Date.now(), ...entry }] };
+    const updated = applyAutoFinish({ ...rec, usageLog: [...(rec.usageLog || []), { id: Date.now(), ...entry }] }, computeRemaining(rec) <= 0);
     setRecords((rs) => rs.map((r) => (r.id === id ? updated : r)));
     return updated;
   };
   const updateUsageEntry = (id, entryId, patch) => {
     const rec = records.find((r) => r.id === id);
     if (!rec) return null;
-    const updated = { ...rec, usageLog: (rec.usageLog || []).map((u) => (u.id === entryId ? { ...u, ...patch } : u)) };
+    const updated = applyAutoFinish({ ...rec, usageLog: (rec.usageLog || []).map((u) => (u.id === entryId ? { ...u, ...patch } : u)) }, computeRemaining(rec) <= 0);
     setRecords((rs) => rs.map((r) => (r.id === id ? updated : r)));
     return updated;
   };
   const deleteUsageEntry = (id, entryId) => {
     const rec = records.find((r) => r.id === id);
     if (!rec) return null;
-    const updated = { ...rec, usageLog: (rec.usageLog || []).filter((u) => u.id !== entryId) };
+    const updated = applyAutoFinish({ ...rec, usageLog: (rec.usageLog || []).filter((u) => u.id !== entryId) }, computeRemaining(rec) <= 0);
     setRecords((rs) => rs.map((r) => (r.id === id ? updated : r)));
     return updated;
   };
@@ -2688,7 +2845,7 @@ function MatchaApp({ lang, setLang, records, setRecords, userEmail, nickname, is
         {tab === "stats" && <StatsTab lang={lang} records={records} />}
         {tab === "feedback" && <FeedbackTab lang={lang} />}
         {tab === "settings" && (
-          <SettingsTab lang={lang} setLang={setLang} userEmail={userEmail} nickname={nickname} isGuest={isGuest} onGoToAuth={onGoToAuth} onLogout={onLogout} records={records} setRecords={setRecords} />
+          <SettingsTab lang={lang} setLang={setLang} userEmail={userEmail} nickname={nickname} isGuest={isGuest} onGoToAuth={onGoToAuth} onLogout={onLogout} onSetNickname={onSetNickname} records={records} setRecords={setRecords} />
         )}
       </main>
 
@@ -2740,7 +2897,7 @@ export default function App() {
   const handleGoToAuth = () => { setIsGuest(false); setUserEmail(null); setNickname(""); };
 
   if (!userEmail && !isGuest) {
-    return <AuthScreen onLogin={handleLogin} onSignup={handleSignup} onGuest={handleGuest} />;
+    return <AuthScreen onEnter={(nick) => { setIsGuest(true); setUserEmail(null); setNickname(nick); }} />;
   }
 
   return (
@@ -2748,7 +2905,7 @@ export default function App() {
       lang={lang} setLang={setLang}
       records={records} setRecords={setRecords}
       userEmail={userEmail} nickname={nickname} isGuest={isGuest}
-      onGoToAuth={handleGoToAuth} onLogout={handleLogout}
+      onGoToAuth={handleGoToAuth} onLogout={handleLogout} onSetNickname={setNickname}
     />
   );
 }
