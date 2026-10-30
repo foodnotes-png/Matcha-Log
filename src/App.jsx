@@ -29,11 +29,15 @@ const FONT_STYLE = (
     /* main scroll area: keep enough room to clear the fixed bottom nav (5rem)
        AND the safe-area inset, additively (a plain pb-20 + safe-pb combo on
        the same element would just overwrite one another instead of adding). */
-    .content-safe-pb { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
+    .content-safe-pb { padding-bottom: calc(5rem + env(safe-area-inset-bottom) * 0.35); }
+    .nav-safe-pb { padding-bottom: calc(env(safe-area-inset-bottom) * 0.35); }
     @media (max-width: 640px) {
-      /* kept at 13px to match the rest of the UI; auto-zoom is prevented by maximum-scale=1 in the viewport meta */
-      input, select, textarea { font-size: 13px !important; }
+      /* kept at 14px to match the rest of the UI; auto-zoom is prevented by maximum-scale=1 in the viewport meta */
+      input, select, textarea { font-size: 14px !important; }
     }
+    html, body { touch-action: manipulation; -webkit-text-size-adjust: 100%; background-color: #E0E6DA; min-height: 100%; }
+    body { min-height: 100vh; min-height: -webkit-fill-available; min-height: 100dvh; }
+    #root { min-height: 100vh; min-height: 100dvh; background-color: #E0E6DA; }
     button {
       border-radius: 9999px !important;
       color: #45320F !important;
@@ -179,7 +183,7 @@ const ORIGIN_MAP = {
   "茶易": { zh: "京都 宇治", en: "Uji, Kyoto" },
 };
 
-const OCCASIONS = ["抹茶拿鐵", "焙茶拿鐵", "玄米茶拿鐵", "純飲", "烘焙", "甜點", "入饌", "其他"];
+const OCCASIONS = ["抹茶拿鐵", "焙茶拿鐵", "玄米茶拿鐵", "純飲", "烘焙", "入饌", "其他"];
 const USAGE_PRESET = ["茶筅刷茶", "打泡器刷茶", "茶粉手搖杯"];
 const LATTE_LABELS = ["抹茶拿鐵", "焙茶拿鐵", "玄米茶拿鐵"];
 function getLatteLabel(category) {
@@ -188,7 +192,7 @@ function getLatteLabel(category) {
   return "抹茶拿鐵";
 }
 function getOccasions(category) {
-  return [getLatteLabel(category), "純飲", "烘焙", "甜點", "入饌", "其他"];
+  return [getLatteLabel(category), "純飲", "烘焙", "入饌", "其他"];
 }
 
 const OCC_LABEL = {
@@ -197,7 +201,6 @@ const OCC_LABEL = {
   "玄米茶拿鐵": { zh: "玄米茶拿鐵", en: "Genmaicha Latte", ja: "玄米茶ラテ" },
   "純飲": { zh: "純飲", en: "Straight (Usucha)", ja: "そのまま飲む" },
   "烘焙": { zh: "烘焙", en: "Baking", ja: "製菓・焼き菓子" },
-  "甜點": { zh: "甜點", en: "Dessert", ja: "デザート" },
   "入饌": { zh: "入饌", en: "Cooking", ja: "料理" },
   "其他": { zh: "其他", en: "Other", ja: "その他" },
 };
@@ -662,6 +665,15 @@ function toUSD(price, currency) {
   return n * rate;
 }
 
+// Approximate HKD equivalent for display, e.g. "(約HKD$145.1)". Null for HKD itself / no price.
+function hkdApprox(price, currency, lang) {
+  if (currency === "HKD$") return null;
+  const usd = toUSD(price, currency);
+  if (usd === null || usd <= 0) return null;
+  const hkd = Math.round(usd * 7.8 * 10) / 10;
+  return `(${lang === "en" ? "approx. " : "約"}HKD$${hkd.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })})`;
+}
+
 const initialForm = {
   photo: null, category: "抹茶", categoryOther: "", brand: "", brandOther: "", origin: "", cultivar: "",
   purchaseDate: "", store: "", currency: "JPY¥", price: "", priceSource: "", initialWeight: "", unsealedExpiry: "", favorite: false,
@@ -812,23 +824,23 @@ function AuthScreen({ onEnter }) {
         <div className="flex flex-col items-center absolute bottom-full left-0 right-0 mb-8">
           <img src={LOGO_SRC} alt="Matcha Log" width={80} height={80} style={{ width: 80, height: 80, objectFit: "contain" }} />
           <h1 className="font-display text-3xl font-700 text-[#1B4A38] mt-3 tracking-wide">抹茶ログ</h1>
-          <p className="font-display text-[14px] text-[#6B6558] tracking-widest mt-0.5">Matcha Log</p>
+          <p className="font-display text-[15px] text-[#6B6558] tracking-widest mt-0.5">Matcha Log</p>
         </div>
 
         <div className="rounded-3xl border border-[#E4DFCF] bg-white/70 p-7">
           <form onSubmit={submit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1 items-center">
-              <label className="text-[15px] text-[#8A8371] text-center">暱稱</label>
+              <label className="text-[16px] text-[#8A8371] text-center">暱稱</label>
               <input value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder="例：抹茶拿鐵愛好者"
-                className="w-full text-center rounded-lg border border-[#E4DFCF] px-3 py-2.5 !text-[16px] outline-none focus:border-[#8DC48D] focus:ring-2 focus:ring-[#BDDBBD] transition" />
+                className="w-full text-center rounded-lg border border-[#E4DFCF] px-3 py-2.5 !text-[17px] outline-none focus:border-[#8DC48D] focus:ring-2 focus:ring-[#BDDBBD] transition" />
             </div>
             <button type="submit" style={{ backgroundColor: "#D5F2DB" }}
-              className="mt-1 rounded-full text-[#1B4A38] font-medium text-[15px] py-2.5 transition hover:brightness-95">
+              className="mt-1 rounded-full text-[#1B4A38] font-medium text-[16px] py-2.5 transition hover:brightness-95">
               歡迎使用Matcha Log！
             </button>
           </form>
         </div>
-        <p className="text-center text-[13px] text-[#B0A990] mt-5 absolute top-full left-0 right-0">資料只會儲存於本裝置</p>
+        <p className="text-center text-[14px] text-[#B0A990] mt-5 absolute top-full left-0 right-0">資料只會儲存於本裝置</p>
       </div>
     </div>
   );
@@ -879,7 +891,7 @@ function WheelColumn({ items, value, onChange }) {
         {items.map((it) => (
           <div key={it} onClick={() => pick(it)}
             style={{ height: WHEEL_ITEM_H, scrollSnapAlign: "center" }}
-            className={`flex items-center justify-center text-[13px] tabular-nums cursor-pointer select-none ${it === value ? "text-[#1B4A38] font-medium" : "text-[#B0A990]"}`}>
+            className={`flex items-center justify-center text-[14px] tabular-nums cursor-pointer select-none ${it === value ? "text-[#1B4A38] font-medium" : "text-[#B0A990]"}`}>
             {it}
           </div>
         ))}
@@ -940,9 +952,9 @@ function LogUsageScreen({ lang, record, onCancel, onSave }) {
         </div>
 
         <header className="flex items-center justify-between px-4 pt-3 pb-3">
-          <button onClick={onCancel} className="text-[13px] px-4 py-2 rounded-full border">{t("add_cancel")}</button>
-          <h1 className="font-display text-[13px] font-700 text-[#1B4A38]">{t("weight_add_title")}</h1>
-          <button onClick={submit} disabled={!canSave} className="text-[13px] px-4 py-2 rounded-full border text-[#2B7056] disabled:opacity-40 disabled:cursor-not-allowed font-medium">
+          <button onClick={onCancel} className="text-[14px] px-4 py-2 rounded-full border">{t("add_cancel")}</button>
+          <h1 className="font-display text-[15px] font-700 text-[#1B4A38]">{t("weight_add_title")}</h1>
+          <button onClick={submit} disabled={!canSave} className="text-[14px] px-4 py-2 rounded-full border text-[#2B7056] disabled:opacity-40 disabled:cursor-not-allowed font-medium">
             {t("action_save")}
           </button>
         </header>
@@ -950,56 +962,56 @@ function LogUsageScreen({ lang, record, onCancel, onSave }) {
         <main className="px-4 pb-8">
           <div className="bg-white rounded-2xl border border-[#E4DFCF] overflow-hidden mb-4">
             <div className="flex items-center justify-between px-4 py-3.5 border-b border-[#F1EEE3]">
-              <div className="flex items-center gap-2 text-[13px]">
+              <div className="flex items-center gap-2 text-[14px]">
                 <RowIcon name="calendar" />
                 <span>{t("weight_useDate_label")}</span>
               </div>
               <input value={date} onChange={(e) => setDate(formatDMYInput(e.target.value))} placeholder="例：2026/01/01"
-                className="text-[13px] text-right bg-transparent outline-none w-32" />
+                className="text-[14px] text-right bg-transparent outline-none w-32" />
             </div>
-            {dateErr && <p className="text-[13px] text-[#A24B3A] px-4 pt-1">{t("date_err")}</p>}
+            {dateErr && <p className="text-[14px] text-[#A24B3A] px-4 pt-1">{t("date_err")}</p>}
 
             <div className="border-b border-[#F1EEE3]">
               <div role="button" tabIndex={0} onClick={() => setTimeOpen((o) => !o)}
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setTimeOpen((o) => !o); } }}
                 className="flex items-center justify-between px-4 py-3.5 cursor-pointer select-none">
-                <div className="flex items-center gap-2 text-[13px]">
+                <div className="flex items-center gap-2 text-[14px]">
                   <RowIcon name="clock" />
                   <span>{t("weight_useTime")}</span>
                 </div>
-                <span className={`text-[13px] tabular-nums ${timeOpen ? "text-[#2B7056] font-medium" : ""}`}>{hour}:{minute}</span>
+                <span className={`text-[14px] tabular-nums ${timeOpen ? "text-[#2B7056] font-medium" : ""}`}>{hour}:{minute}</span>
               </div>
               {timeOpen && (
                 <div className="flex items-center justify-center gap-1 pb-3">
                   <WheelColumn items={HOURS_24} value={hour} onChange={setHour} />
-                  <span className="text-[13px] text-[#8A8371]">:</span>
+                  <span className="text-[14px] text-[#8A8371]">:</span>
                   <WheelColumn items={MINUTES_60} value={minute} onChange={setMinute} />
                 </div>
               )}
             </div>
 
             <div className="flex items-center justify-between px-4 py-3.5 border-b border-[#F1EEE3]">
-              <div className="flex items-center gap-2 text-[13px]">
+              <div className="flex items-center gap-2 text-[14px]">
                 <RowIcon name="scale" />
                 <span>{t("weight_amount_label")}</span>
               </div>
               <div className="flex items-center gap-1">
-                <span className="text-[13px] text-[#B0A990] mr-1">{t("weight_maxPrefix")} {currentRemaining}g</span>
+                <span className="text-[14px] text-[#B0A990] mr-1">{t("weight_maxPrefix")} {currentRemaining}g</span>
                 <input type="number" min={0} max={currentRemaining} step="0.01" value={amount} onChange={(e) => setAmount(clampAmount(e.target.value, currentRemaining))}
-                  className="w-16 text-[13px] text-right bg-transparent outline-none" />
-                <span className="text-[13px] text-[#8A8371]">g</span>
+                  className="w-16 text-[14px] text-right bg-transparent outline-none" />
+                <span className="text-[14px] text-[#8A8371]">g</span>
               </div>
             </div>
 
             <div className="flex items-start justify-between px-4 py-3.5 gap-3 border-b border-[#F1EEE3]">
-              <div className="flex items-center gap-2 text-[13px] pt-2 shrink-0">
+              <div className="flex items-center gap-2 text-[14px] pt-2 shrink-0">
                 <RowIcon name="leaf" />
                 <span>{t("add_occasion")}</span>
               </div>
               <div className="flex flex-wrap justify-end gap-2 py-1">
                 {occasionsForCategory.map((o) => (
                   <button key={o} type="button" onClick={() => togglePurpose(o)}
-                    className={`text-[13px] px-4 py-2 rounded-full border transition ${purposes.includes(o) ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+                    className={`text-[14px] px-4 py-2 rounded-full border transition ${purposes.includes(o) ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
                     {OCC_LABEL[o][lang]}
                   </button>
                 ))}
@@ -1008,18 +1020,18 @@ function LogUsageScreen({ lang, record, onCancel, onSave }) {
             {purposes.includes("其他") && (
               <div className="px-4 py-3 border-b border-[#F1EEE3]">
                 <input value={purposeOther} onChange={(e) => setPurposeOther(e.target.value)} placeholder={t("add_occasion_other_ph")}
-                  className="w-full rounded-lg border border-[#E4DFCF] px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D]" />
+                  className="w-full rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D]" />
               </div>
             )}
             {showTeaStyle && (
               <div className="flex items-start justify-between px-4 py-3.5 gap-3">
-                <div className="flex items-center gap-2 text-[13px] pt-2 shrink-0">
+                <div className="flex items-center gap-2 text-[14px] pt-2 shrink-0">
                   <span>{t("add_teaStyle")}</span>
                 </div>
                 <div className="flex flex-wrap justify-end gap-2 py-1">
                   {TEA_STYLES.map((s) => (
                     <button key={s} type="button" onClick={() => setTeaStyle(teaStyle === s ? "" : s)}
-                      className={`text-[13px] px-4 py-2 rounded-full border transition ${teaStyle === s ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+                      className={`text-[14px] px-4 py-2 rounded-full border transition ${teaStyle === s ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
                       {TEA_STYLE_LABEL[s][lang]}
                     </button>
                   ))}
@@ -1030,40 +1042,40 @@ function LogUsageScreen({ lang, record, onCancel, onSave }) {
 
           <div className="bg-white rounded-2xl border border-[#E4DFCF] overflow-hidden mb-4">
             <div className="flex items-start justify-between px-4 py-3.5 gap-3">
-              <div className="flex items-center gap-2 text-[13px] pt-1 shrink-0">
+              <div className="flex items-center gap-2 text-[14px] pt-1 shrink-0">
                 <span>{t("add_usage")}</span>
               </div>
               <div className="flex-1 flex flex-col items-end gap-2">
                 {isPresetUsage ? (
                   <>
-                    <select value={usage} onChange={(e) => setUsage(e.target.value)} className="text-[13px] text-right bg-transparent outline-none">
+                    <select value={usage} onChange={(e) => setUsage(e.target.value)} className="text-[14px] text-right bg-transparent outline-none">
                       <option value="" disabled>{t("add_usage_ph")}</option>
                       {USAGE_PRESET.map((u) => <option key={u} value={u}>{USAGE_LABEL[u][lang]}</option>)}
                       <option value="其他">{USAGE_LABEL["其他"][lang]}</option>
                     </select>
                     {usage === "其他" && (
                       <input value={usageOther} onChange={(e) => setUsageOther(e.target.value)} placeholder={t("add_usage_other_ph")}
-                        className="w-full rounded-lg border border-[#E4DFCF] px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D]" />
+                        className="w-full rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D]" />
                     )}
                   </>
                 ) : (
                   <input value={usageOther} onChange={(e) => setUsageOther(e.target.value)} placeholder={t("add_usage_other_ph")}
-                    className="w-full rounded-lg border border-[#E4DFCF] px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D] text-right" />
+                    className="w-full rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D] text-right" />
                 )}
               </div>
             </div>
           </div>
 
           <div className="bg-white rounded-2xl border border-[#E4DFCF] overflow-hidden mb-4 px-4 py-3.5">
-            <div className="flex items-center gap-2 text-[13px] mb-2">
+            <div className="flex items-center gap-2 text-[14px] mb-2">
               <RowIcon name="note" />
               <span>{t("weight_note")}</span>
             </div>
             <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder={t("weight_note_ph")}
-              className="w-full text-[13px] outline-none resize-none placeholder:text-[#B0A990]" />
+              className="w-full text-[14px] outline-none resize-none placeholder:text-[#B0A990]" />
           </div>
 
-          <p className="text-center text-[13px] text-[#6B6558]">
+          <p className="text-center text-[14px] text-[#6B6558]">
             {t("weight_afterPreview")} <span className="font-display font-700 text-[#2B7056]">{previewRemaining}g</span>
           </p>
         </main>
@@ -1102,7 +1114,7 @@ function UsageLogItem({ lang, entry, category, maxAmount, onSave, onDelete }) {
 
   if (!editing) {
     return (
-      <div className="flex flex-col text-[13px] text-[#6B6558] border-b border-[#F1EEE3] pb-1.5 gap-0.5">
+      <div className="flex flex-col text-[14px] text-[#6B6558] border-b border-[#F1EEE3] pb-1.5 gap-0.5">
         <div className="flex justify-between items-center">
           <span>{entry.time ? `${entry.date} ${entry.time}` : entry.date}</span>
           <div className="flex items-center gap-2">
@@ -1138,22 +1150,22 @@ function UsageLogItem({ lang, entry, category, maxAmount, onSave, onDelete }) {
     <div className="flex flex-col gap-2 border-b border-[#F1EEE3] pb-3">
       <div className="flex flex-col gap-1">
         <input value={date} onChange={(e) => setDate(formatDMYInput(e.target.value))} placeholder="例：2026/01/01"
-          className={`rounded-lg border px-2 py-1.5 text-[13px] outline-none ${dateErr ? "border-[#D98C7A]" : "border-[#E4DFCF]"}`} />
-        {dateErr && <p className="text-[13px] text-[#A24B3A]">{t("date_err")}</p>}
+          className={`rounded-lg border px-2 py-1.5 text-[14px] outline-none ${dateErr ? "border-[#D98C7A]" : "border-[#E4DFCF]"}`} />
+        {dateErr && <p className="text-[14px] text-[#A24B3A]">{t("date_err")}</p>}
       </div>
       <div className="flex gap-2 items-center">
-        <button type="button" onClick={() => setTimeOpen((o) => !o)} className={`btn-plain rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-[13px] tabular-nums bg-white ${timeOpen ? "text-[#2B7056] font-medium" : ""}`}>{hour}:{minute}</button>
+        <button type="button" onClick={() => setTimeOpen((o) => !o)} className={`btn-plain rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-[14px] tabular-nums bg-white ${timeOpen ? "text-[#2B7056] font-medium" : ""}`}>{hour}:{minute}</button>
         <div className="relative flex-1">
           <input type="number" min={0} max={maxAmount} step="0.01" value={amount} onChange={(e) => setAmount(clampAmount(e.target.value, maxAmount))}
-            className="w-full rounded-lg border border-[#E4DFCF] pl-2 pr-6 py-1.5 text-[13px] outline-none" />
-          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[13px] text-[#B0A990]">g</span>
+            className="w-full rounded-lg border border-[#E4DFCF] pl-2 pr-6 py-1.5 text-[14px] outline-none" />
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[14px] text-[#B0A990]">g</span>
         </div>
       </div>
-      {maxAmount !== undefined && <p className="text-[13px] text-[#B0A990]">{t("weight_maxPrefix")} {maxAmount}g</p>}
+      {maxAmount !== undefined && <p className="text-[14px] text-[#B0A990]">{t("weight_maxPrefix")} {maxAmount}g</p>}
       {timeOpen && (
         <div className="flex items-center justify-center gap-1">
           <WheelColumn items={HOURS_24} value={hour} onChange={setHour} />
-          <span className="text-[13px] text-[#8A8371]">:</span>
+          <span className="text-[14px] text-[#8A8371]">:</span>
           <WheelColumn items={MINUTES_60} value={minute} onChange={setMinute} />
         </div>
       )}
@@ -1161,18 +1173,18 @@ function UsageLogItem({ lang, entry, category, maxAmount, onSave, onDelete }) {
       <div className="flex flex-wrap gap-1.5">
         {occasionsForCategory.map((o) => (
           <button key={o} type="button" onClick={() => togglePurpose(o)}
-            className={`text-[13px] px-3 py-1 rounded-full border transition ${purposes.includes(o) ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558]"}`}>
+            className={`text-[14px] px-3 py-1 rounded-full border transition ${purposes.includes(o) ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558]"}`}>
             {OCC_LABEL[o][lang]}
           </button>
         ))}
       </div>
       {purposes.includes("其他") && (
         <input value={purposeOther} onChange={(e) => setPurposeOther(e.target.value)} placeholder={t("add_occasion_other_ph")}
-          className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-[13px] outline-none" />
+          className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-[14px] outline-none" />
       )}
 
       {showTeaStyle && (
-        <select value={teaStyle} onChange={(e) => setTeaStyle(e.target.value)} className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-[13px] outline-none bg-white">
+        <select value={teaStyle} onChange={(e) => setTeaStyle(e.target.value)} className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-[14px] outline-none bg-white">
           <option value="" disabled>{t("add_category_ph")}</option>
           {TEA_STYLES.map((s) => <option key={s} value={s}>{TEA_STYLE_LABEL[s][lang]}</option>)}
         </select>
@@ -1180,26 +1192,26 @@ function UsageLogItem({ lang, entry, category, maxAmount, onSave, onDelete }) {
 
       {isPresetUsage ? (
         <>
-          <select value={usage} onChange={(e) => setUsage(e.target.value)} className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-[13px] outline-none bg-white">
+          <select value={usage} onChange={(e) => setUsage(e.target.value)} className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-[14px] outline-none bg-white">
             <option value="" disabled>{t("add_usage_ph")}</option>
             {USAGE_PRESET.map((u) => <option key={u} value={u}>{USAGE_LABEL[u][lang]}</option>)}
             <option value="其他">{USAGE_LABEL["其他"][lang]}</option>
           </select>
           {usage === "其他" && (
             <input value={usageOther} onChange={(e) => setUsageOther(e.target.value)} placeholder={t("add_usage_other_ph")}
-              className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-[13px] outline-none" />
+              className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-[14px] outline-none" />
           )}
         </>
       ) : (
         <input value={usageOther} onChange={(e) => setUsageOther(e.target.value)} placeholder={t("add_usage_other_ph")}
-          className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-[13px] outline-none" />
+          className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-[14px] outline-none" />
       )}
 
       <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder={t("weight_note")}
-        className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-[13px] outline-none resize-none" />
+        className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-[14px] outline-none resize-none" />
       <div className="flex justify-end gap-2">
-        <button onClick={() => setEditing(false)} className="text-[13px] px-3 py-1 rounded-full">{t("add_cancel")}</button>
-        <button onClick={submit} className="text-[13px] px-3 py-1 rounded-full bg-[#EAF3E8]">{t("action_save")}</button>
+        <button onClick={() => setEditing(false)} className="text-[14px] px-3 py-1 rounded-full">{t("add_cancel")}</button>
+        <button onClick={submit} className="text-[14px] px-3 py-1 rounded-full bg-[#EAF3E8]">{t("action_save")}</button>
       </div>
     </div>
   );
@@ -1316,8 +1328,8 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
   };
 
   const weightSection = liveRecord && Number(liveRecord.initialWeight) > 0 && (
-    <div className="mt-6 pt-6 border-t border-[#E4DFCF]">
-      <h2 className="font-display text-[15px] text-[#1B4A38] mb-4">{t("weight_remaining")}</h2>
+    <div className="mt-2 pt-6 border-t border-[#E4DFCF]">
+      <h2 className="font-display text-[16px] text-[#1B4A38] mb-4">{t("weight_remaining")}</h2>
       {(() => {
         const initW = Number(liveRecord.initialWeight) || 0;
         const remaining = computeRemaining(liveRecord);
@@ -1327,29 +1339,28 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
             <div className="w-28 h-28 rounded-full shrink-0 relative"
               style={{ background: `conic-gradient(#8DC48D 0% ${100 - usedPct}%, #E4DFCF ${100 - usedPct}% 100%)` }}>
               <div className="absolute inset-3 rounded-full bg-white flex flex-col items-center justify-center">
-                <span className="font-display text-[13px] text-[#2B7056]">{remaining}g</span>
-                <span className="text-[13px] text-[#B0A990]">/ {initW}g</span>
+                <span className="font-display text-[15px] text-[#2B7056]">{remaining}g</span>
+                <span className="text-[14px] text-[#B0A990]">/ {initW}g</span>
               </div>
             </div>
-            {remaining <= 0 && (
-              <span className="text-[13px] text-[#BA0F0F]">{t("weight_usedUp")}</span>
-            )}
+            <div className="flex flex-col gap-3 flex-1 min-w-0 max-w-[140px]">
+              <button onClick={() => setShowUsageLog((v) => !v)} className="btn-brown text-[14px] px-4 py-2.5 rounded-full border w-full whitespace-nowrap">
+                {t("weight_log")}
+              </button>
+              <button onClick={() => canAddUsage && setSubScreen("logUsage")} disabled={!canAddUsage} className="text-[14px] px-4 py-2.5 rounded-full border w-full whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed">
+                {t("weight_add")}
+              </button>
+              {remaining <= 0 && (
+                <span className="text-[14px] text-[#BA0F0F] text-center">{t("weight_usedUp")}</span>
+              )}
+            </div>
           </div>
         );
       })()}
 
-      <div className="flex gap-2 mb-4">
-        <button onClick={() => setShowUsageLog((v) => !v)} className="btn-brown text-[13px] px-4 py-2 rounded-full border">
-          {t("weight_log")}
-        </button>
-        <button onClick={() => canAddUsage && setSubScreen("logUsage")} disabled={!canAddUsage} className="text-[13px] px-4 py-2 rounded-full border disabled:opacity-40 disabled:cursor-not-allowed">
-          {t("weight_add")}
-        </button>
-      </div>
-
       {showUsageLog && (
         (liveRecord.usageLog || []).length === 0 ? (
-          <p className="text-[13px] text-[#8A8371]">{t("weight_empty")}</p>
+          <p className="text-[14px] text-[#8A8371]">{t("weight_empty")}</p>
         ) : (
           <div className="flex flex-col gap-2">
             {[...liveRecord.usageLog].reverse().map((u) => (
@@ -1377,14 +1388,17 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
         {FONT_STYLE}
         <header className="max-w-2xl mx-auto px-6 pt-10 pb-6">
           <div className="flex items-start justify-between">
-            <button onClick={onCancel} className="btn-plain text-[13px] text-[#6B6558] hover:text-[#2B7056] flex items-center gap-1">
-              {t("add_back")}
-            </button>
+            <div className="flex flex-col items-start gap-3">
+              <button onClick={onCancel} className="btn-plain text-[14px] text-[#6B6558] hover:text-[#2B7056] flex items-center gap-1">
+                {t("add_back")}
+              </button>
+              <h1 className="font-display text-2xl md:text-3xl text-[#1B4A38] font-700">{t("records_title")}</h1>
+            </div>
             <div className="flex flex-col items-end gap-2">
-              <button onClick={() => setScreenMode("edit")} className="text-[13px] px-4 py-1.5 rounded-full border flex items-center gap-1.5">
+              <button onClick={() => setScreenMode("edit")} className="text-[14px] px-4 py-1.5 rounded-full border flex items-center gap-1.5">
                 <EditIcon size={12} /> {t("action_edit")}
               </button>
-              <button onClick={() => setConfirmDelete(true)} className="btn-danger text-[13px] px-4 py-1.5 rounded-full border flex items-center gap-1.5">
+              <button onClick={() => setConfirmDelete(true)} className="btn-danger text-[14px] px-4 py-1.5 rounded-full border flex items-center gap-1.5">
                 <TrashIcon size={12} /> {t("delete")}
               </button>
             </div>
@@ -1397,9 +1411,9 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
             {liveRecord.favorite && <span className="absolute top-4 right-4"><FavStar on size={22} /></span>}
             <div className="flex flex-col items-center text-center mb-5">
               {liveRecord.photo ? (
-                <img src={liveRecord.photo} alt="" className="w-16 h-16 rounded-full object-cover border border-[#E4DFCF]" />
+                <img src={liveRecord.photo} alt="" style={{ width: 88, height: 88 }} className="rounded-full object-cover border border-[#E4DFCF]" />
               ) : (
-                <MatchaBowl rating={liveRecord.rating || 3} seedKey={liveRecord.id} size={72} />
+                <MatchaBowl rating={liveRecord.rating || 3} seedKey={liveRecord.id} size={88} />
               )}
             </div>
 
@@ -1417,18 +1431,18 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
                   <ViewField label={t("add_priceSource")} value={liveRecord.priceSource ? (PRICE_SOURCE_LABEL[liveRecord.priceSource] ? PRICE_SOURCE_LABEL[liveRecord.priceSource][lang] : liveRecord.priceSource) : "—"} />
                 </>
               ) : (
-                liveRecord.price && <ViewField label={t("add_price")} value={`${liveRecord.currency || ""} ${liveRecord.price}`} />
+                liveRecord.price && <ViewField label={t("add_price")} value={<>{`${liveRecord.currency || ""} ${liveRecord.price}`}{hkdApprox(liveRecord.price, liveRecord.currency, lang) && <span className="font-normal text-[#B0A990] ml-1.5">{hkdApprox(liveRecord.price, liveRecord.currency, lang)}</span>}</>} />
               )}
               <ViewField label={t("add_status")} value={statusText} />
               {liveRecord.status === "未開封" && <ViewField label={t("add_unsealedExpiry")} value={liveRecord.unsealedExpiry || "—"} />}
               {liveRecord.status === "已開封" && <ViewField label={t("add_openedDate")} value={liveRecord.openedDate || "—"} />}
               {liveRecord.status === "已開封" && <ViewField label={t("add_expiryDays")} value={`${liveRecord.expiryDays || 30}`} />}
               {liveRecord.status === "已用完" && <ViewField label={t("add_finishedDate")} value={liveRecord.finishedDate || lastUsageDate(liveRecord) || "—"} />}
-              <div className="flex items-center justify-between gap-4 text-[13px] py-3">
+              <div className="flex items-center justify-between gap-4 text-[14px] py-3">
                 <span className="shrink-0 text-[#8A8371]">{t("add_rating")}</span>
                 <Stars value={liveRecord.rating} size={14} />
               </div>
-              <div className="flex items-center justify-between gap-4 text-[13px] py-3">
+              <div className="flex items-center justify-between gap-4 text-[14px] py-3">
                 <span className="shrink-0 text-[#8A8371]">{t("add_occasion")}</span>
                 <div className="flex flex-wrap justify-end gap-1.5">
                   {(liveRecord.occasions || []).map((o) => <Tag key={o}>{OCC_LABEL[o] ? OCC_LABEL[o][lang] : o}</Tag>)}
@@ -1451,12 +1465,12 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
       {confirmDelete && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 px-6" onClick={() => setConfirmDelete(false)}>
           <div className="bg-white rounded-3xl border border-[#E4DFCF] p-6 max-w-xs w-full" onClick={(e) => e.stopPropagation()}>
-            <p className="text-[13px] text-[#2E2A24] mb-5 text-center">{t("delete_confirm_msg")}</p>
+            <p className="text-[14px] text-[#2E2A24] mb-5 text-center">{t("delete_confirm_msg")}</p>
             <div className="flex justify-center gap-3">
-              <button onClick={() => { onDelete(liveRecord.id); onCancel(); }} className="btn-danger text-[13px] px-5 py-2 rounded-full border">
+              <button onClick={() => { onDelete(liveRecord.id); onCancel(); }} className="btn-danger text-[14px] px-5 py-2 rounded-full border">
                 {t("delete_yes")}
               </button>
-              <button onClick={() => setConfirmDelete(false)} className="text-[13px] px-5 py-2 rounded-full border border-[#E4DFCF] text-[#6B6558]">
+              <button onClick={() => setConfirmDelete(false)} className="text-[14px] px-5 py-2 rounded-full border border-[#E4DFCF] text-[#6B6558]">
                 {t("delete_cancel")}
               </button>
             </div>
@@ -1531,7 +1545,7 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
     <div className="min-h-screen w-full bg-[#E0E6DA] font-body text-[#2E2A24]">
       {FONT_STYLE}
       <header className="max-w-2xl mx-auto px-6 pt-10 pb-6">
-        <button onClick={onCancel} className="btn-plain text-[13px] text-[#6B6558] hover:text-[#2B7056] flex items-center gap-1 mb-4">
+        <button onClick={onCancel} className="btn-plain text-[14px] text-[#6B6558] hover:text-[#2B7056] flex items-center gap-1 mb-4">
           {t("add_back")}
         </button>
         {!initialRecord && (
@@ -1547,20 +1561,20 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
           {/* photo — always centered, for both add and edit */}
           <div className="flex flex-col items-center text-center mb-5 gap-4">
             {form.photo ? (
-              <img src={form.photo} alt="" className="w-16 h-16 rounded-full object-cover border border-[#E4DFCF]" />
+              <img src={form.photo} alt="" style={{ width: 88, height: 88 }} className="rounded-full object-cover border border-[#E4DFCF]" />
             ) : (
-              <MatchaBowl rating={form.rating || 3} seedKey="preview" size={64} />
+              <MatchaBowl rating={form.rating || 3} seedKey="preview" size={88} />
             )}
             <div className="flex flex-col gap-1 items-center">
-              <label className="text-[13px] text-[#8A8371]">{t("add_photo")}</label>
-              <p className="text-[13px] text-[#B0A990]">{t("add_photo_hint")}</p>
+              <label className="text-[14px] text-[#8A8371]">{t("add_photo")}</label>
+              <p className="text-[14px] text-[#B0A990]">{t("add_photo_hint")}</p>
               <div className="flex gap-3 items-center mt-1">
-                <label className="text-[13px] px-3 py-1.5 rounded-full bg-[#EAF3E8] text-[#2B7056] border-[1.5px] border-[#BDDBBD] cursor-pointer hover:bg-[#D5F2DB] transition">
+                <label className="text-[14px] px-3 py-1.5 rounded-full bg-[#EAF3E8] text-[#2B7056] border-[1.5px] border-[#BDDBBD] cursor-pointer hover:bg-[#D5F2DB] transition">
                   <input type="file" accept="image/jpeg,image/png,image/heic,image/heif" onChange={handlePhoto} className="hidden" />
                   {form.photo ? t("photo_change") : t("photo_new")}
                 </label>
                 {form.photo && (
-                  <button onClick={() => update("photo", null)} className="text-[13px] px-3 py-1.5 rounded-full">
+                  <button onClick={() => update("photo", null)} className="text-[14px] px-3 py-1.5 rounded-full">
                     {t("add_photo_remove")}
                   </button>
                 )}
@@ -1570,99 +1584,99 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
-              <label className="text-[13px] text-[#8A8371]">{t("add_category")}</label>
+              <label className="text-[14px] text-[#8A8371]">{t("add_category")}</label>
               <select value={form.category} onChange={(e) => handleCategory(e.target.value)}
-                className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D] bg-white">
+                className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D] bg-white">
                 <option value="" disabled>{t("add_category_ph")}</option>
                 {TEA_CATEGORIES.map((c) => <option key={c} value={c}>{CATEGORY_LABEL[c][lang]}</option>)}
               </select>
               {form.category === "其他" && (
                 <input value={form.categoryOther} onChange={(e) => update("categoryOther", e.target.value)}
                   placeholder={t("add_category_other_ph")}
-                  className="mt-1 rounded-lg border border-[#E4DFCF] px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D]" />
+                  className="mt-1 rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D]" />
               )}
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-[13px] text-[#8A8371]">{t("add_brand")}</label>
+              <label className="text-[14px] text-[#8A8371]">{t("add_brand")}</label>
               {currentBrandList ? (
                 <>
                   <select value={form.brand} onChange={(e) => handleBrand(e.target.value)}
-                    className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D] bg-white">
+                    className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D] bg-white">
                     <option value="" disabled>{t("add_brand_ph")}</option>
                     {currentBrandList.map((b) => <option key={b} value={b}>{b}</option>)}
                   </select>
                   {form.brand === "其他" && (
                     <input value={form.brandOther} onChange={(e) => update("brandOther", e.target.value)}
                       placeholder={t("add_brand_other_ph")}
-                      className="mt-1 rounded-lg border border-[#E4DFCF] px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D]" />
+                      className="mt-1 rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D]" />
                   )}
                 </>
               ) : (
                 <input value={form.brandOther} onChange={(e) => update("brandOther", e.target.value)}
                   placeholder={t("add_brand_other_ph")}
-                  className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D]" />
+                  className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D]" />
               )}
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-[13px] text-[#8A8371]">{t("add_origin")}</label>
+              <label className="text-[14px] text-[#8A8371]">{t("add_origin")}</label>
               <input value={form.origin} onChange={(e) => update("origin", e.target.value)}
                 placeholder={form.brand === "其他" ? t("add_origin_ph") : "例：京都 宇治"}
-                className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D]" />
+                className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D]" />
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-[13px] text-[#8A8371]">{t("add_cultivar")}</label>
+              <label className="text-[14px] text-[#8A8371]">{t("add_cultivar")}</label>
               <input value={form.cultivar} onChange={(e) => update("cultivar", e.target.value)}
-                className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D]" />
+                className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D]" />
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-[13px] text-[#8A8371]">{t("add_weight")}</label>
+              <label className="text-[14px] text-[#8A8371]">{t("add_weight")}</label>
               <div className="relative">
                 <input type="number" min={0} step="0.01" value={form.initialWeight} onChange={(e) => update("initialWeight", e.target.value)}
-                  className="w-full rounded-lg border border-[#E4DFCF] pl-3 pr-8 py-2 text-[13px] outline-none focus:border-[#8DC48D]" />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[13px] text-[#B0A990]">g</span>
+                  className="w-full rounded-lg border border-[#E4DFCF] pl-3 pr-8 py-2 text-[14px] outline-none focus:border-[#8DC48D]" />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[14px] text-[#B0A990]">g</span>
               </div>
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-[13px] text-[#8A8371]">{t("add_purchaseDate")}</label>
+              <label className="text-[14px] text-[#8A8371]">{t("add_purchaseDate")}</label>
               <input value={form.purchaseDate} onChange={(e) => update("purchaseDate", formatDMYInput(e.target.value))} placeholder="例：2026/01/01"
-                className={`rounded-lg border px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D] ${dateErr.purchase ? "border-[#D98C7A]" : "border-[#E4DFCF]"}`} />
-              {dateErr.purchase && <p className="text-[13px] text-[#A24B3A]">{t("date_err")}</p>}
+                className={`rounded-lg border px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D] ${dateErr.purchase ? "border-[#D98C7A]" : "border-[#E4DFCF]"}`} />
+              {dateErr.purchase && <p className="text-[14px] text-[#A24B3A]">{t("date_err")}</p>}
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-[13px] text-[#8A8371]">{t("add_store")}</label>
+              <label className="text-[14px] text-[#8A8371]">{t("add_store")}</label>
               <input value={form.store} onChange={(e) => update("store", e.target.value)}
-                className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D]" />
+                className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D]" />
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-[13px] text-[#8A8371]">{t("add_price")}</label>
+              <label className="text-[14px] text-[#8A8371]">{t("add_price")}</label>
               <div className="flex gap-2">
                 <select value={form.currency}
                   onChange={(e) => {
                     const v = e.target.value;
                     setForm((f) => ({ ...f, currency: v, price: v === PRICE_NA ? "" : f.price }));
                   }}
-                  className="rounded-lg border border-[#E4DFCF] px-2 py-2 text-[13px] outline-none focus:border-[#8DC48D] bg-white w-28">
+                  className="rounded-lg border border-[#E4DFCF] px-2 py-2 text-[14px] outline-none focus:border-[#8DC48D] bg-white w-28">
                   {CURRENCIES.map((c) => <option key={c} value={c}>{c === PRICE_NA ? t("price_na") : c}</option>)}
                 </select>
                 <input type="number" min={0} step="0.01" value={form.price}
                   disabled={form.currency === PRICE_NA}
                   onChange={(e) => update("price", e.target.value)}
-                  className="flex-1 min-w-0 rounded-lg border border-[#E4DFCF] px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D] disabled:bg-[#F1EEE3] disabled:opacity-60 disabled:cursor-not-allowed" />
+                  className="flex-1 min-w-0 rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D] disabled:bg-[#F1EEE3] disabled:opacity-60 disabled:cursor-not-allowed" />
               </div>
               {form.currency === PRICE_NA && (
                 <div className="flex flex-col gap-1 mt-2">
-                  <label className="text-[13px] text-[#8A8371]">{t("add_priceSource")}</label>
+                  <label className="text-[14px] text-[#8A8371]">{t("add_priceSource")}</label>
                   <div className="flex flex-wrap gap-2">
                     {PRICE_SOURCES.map((s) => (
                       <button key={s} type="button" onClick={() => update("priceSource", form.priceSource === s ? "" : s)}
-                        className={`text-[13px] px-3 py-1.5 rounded-full border transition ${form.priceSource === s ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+                        className={`text-[14px] px-3 py-1.5 rounded-full border transition ${form.priceSource === s ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
                         {PRICE_SOURCE_LABEL[s][lang]}
                       </button>
                     ))}
@@ -1672,11 +1686,11 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
             </div>
 
             <div className="md:col-span-2 flex flex-col gap-1">
-              <label className="text-[13px] text-[#8A8371]">{t("add_status")}</label>
+              <label className="text-[14px] text-[#8A8371]">{t("add_status")}</label>
               <div className="flex gap-2">
                 {["未開封", "已開封", "已用完"].map((s) => (
                   <button key={s} type="button" onClick={() => update("status", s)}
-                    className={`text-[13px] px-4 py-2 rounded-full border transition ${form.status === s ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+                    className={`text-[14px] px-4 py-2 rounded-full border transition ${form.status === s ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
                     {s === "未開封" ? t("status_unopened") : s === "已開封" ? t("status_inUse") : t("status_used")}
                   </button>
                 ))}
@@ -1685,32 +1699,32 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
 
             {form.status === "未開封" && (
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] text-[#8A8371]">{t("add_unsealedExpiry")}</label>
+                <label className="text-[14px] text-[#8A8371]">{t("add_unsealedExpiry")}</label>
                 <input value={form.unsealedExpiry} onChange={(e) => update("unsealedExpiry", formatDMYInput(e.target.value))} placeholder="例：2026/01/01"
-                  className={`rounded-lg border px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D] ${dateErr.unsealed ? "border-[#D98C7A]" : "border-[#E4DFCF]"}`} />
-                {dateErr.unsealed && <p className="text-[13px] text-[#A24B3A]">{t("date_err")}</p>}
+                  className={`rounded-lg border px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D] ${dateErr.unsealed ? "border-[#D98C7A]" : "border-[#E4DFCF]"}`} />
+                {dateErr.unsealed && <p className="text-[14px] text-[#A24B3A]">{t("date_err")}</p>}
               </div>
             )}
 
             {form.status === "已開封" && (
               <>
                 <div className="flex flex-col gap-1">
-                  <label className="text-[13px] text-[#8A8371]">{t("add_openedDate")}</label>
+                  <label className="text-[14px] text-[#8A8371]">{t("add_openedDate")}</label>
                   <input value={form.openedDate} onChange={(e) => update("openedDate", formatDMYInput(e.target.value))} placeholder="例：2026/01/01"
-                    className={`rounded-lg border px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D] ${dateErr.opened ? "border-[#D98C7A]" : "border-[#E4DFCF]"}`} />
-                  {dateErr.opened && <p className="text-[13px] text-[#A24B3A]">{t("date_err")}</p>}
+                    className={`rounded-lg border px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D] ${dateErr.opened ? "border-[#D98C7A]" : "border-[#E4DFCF]"}`} />
+                  {dateErr.opened && <p className="text-[14px] text-[#A24B3A]">{t("date_err")}</p>}
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-[13px] text-[#8A8371]">{t("add_expiryDays")}</label>
+                  <label className="text-[14px] text-[#8A8371]">{t("add_expiryDays")}</label>
                   <input type="number" min={1} max={30} value={form.expiryDays}
                     onChange={(e) => update("expiryDays", Math.min(30, Math.max(1, Number(e.target.value) || 1)))}
-                    className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D]" />
+                    className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D]" />
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-[13px] text-[#8A8371]">{t("add_suggestedExpiry")}</label>
-                  <div className="rounded-lg border border-[#E4DFCF] bg-[#F1EEE3] px-3 py-2 text-[13px] text-[#6B6558]">
+                  <label className="text-[14px] text-[#8A8371]">{t("add_suggestedExpiry")}</label>
+                  <div className="rounded-lg border border-[#E4DFCF] bg-[#F1EEE3] px-3 py-2 text-[14px] text-[#6B6558]">
                     {(() => {
                       const opened = parseDMY(form.openedDate);
                       if (!opened) return "—";
@@ -1727,24 +1741,24 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
 
             {form.status === "已用完" && (
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] text-[#8A8371]">{t("add_finishedDate")}</label>
+                <label className="text-[14px] text-[#8A8371]">{t("add_finishedDate")}</label>
                 <input value={form.finishedDate} onChange={(e) => update("finishedDate", formatDMYInput(e.target.value))} placeholder="例：2026/01/01"
-                  className={`rounded-lg border px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D] ${dateErr.finished ? "border-[#D98C7A]" : "border-[#E4DFCF]"}`} />
-                {dateErr.finished && <p className="text-[13px] text-[#A24B3A]">{t("date_err")}</p>}
+                  className={`rounded-lg border px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D] ${dateErr.finished ? "border-[#D98C7A]" : "border-[#E4DFCF]"}`} />
+                {dateErr.finished && <p className="text-[14px] text-[#A24B3A]">{t("date_err")}</p>}
               </div>
             )}
 
             <div className="flex flex-col gap-1">
-              <label className="text-[13px] text-[#8A8371]">{t("add_rating")}</label>
+              <label className="text-[14px] text-[#8A8371]">{t("add_rating")}</label>
               <div className="py-1.5"><Stars value={form.rating} size={22} onSelect={(n) => update("rating", n)} /></div>
             </div>
 
             <div className="md:col-span-2 flex flex-col gap-1">
-              <label className="text-[13px] text-[#8A8371]">{t("add_occasion")}</label>
+              <label className="text-[14px] text-[#8A8371]">{t("add_occasion")}</label>
               <div className="flex flex-wrap gap-2">
                 {occasionsForCategory.map((o) => (
                   <button key={o} type="button" onClick={() => toggleOccasion(o)}
-                    className={`text-[13px] px-4 py-2 rounded-full border transition ${form.occasions.includes(o) ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+                    className={`text-[14px] px-4 py-2 rounded-full border transition ${form.occasions.includes(o) ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
                     {OCC_LABEL[o][lang]}
                   </button>
                 ))}
@@ -1752,16 +1766,16 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
               {form.occasions.includes("其他") && (
                 <input value={form.occasionOther} onChange={(e) => update("occasionOther", e.target.value)}
                   placeholder={t("add_occasion_other_ph")}
-                  className="mt-1 rounded-lg border border-[#E4DFCF] px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D]" />
+                  className="mt-1 rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D]" />
               )}
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-[13px] text-[#8A8371]">{t("add_usage")}</label>
+              <label className="text-[14px] text-[#8A8371]">{t("add_usage")}</label>
               {isPresetUsage ? (
                 <>
                   <select value={form.usage} onChange={(e) => update("usage", e.target.value)}
-                    className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D] bg-white">
+                    className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D] bg-white">
                     <option value="" disabled>{t("add_usage_ph")}</option>
                     {USAGE_PRESET.map((u) => <option key={u} value={u}>{USAGE_LABEL[u][lang]}</option>)}
                     <option value="其他">{USAGE_LABEL["其他"][lang]}</option>
@@ -1769,21 +1783,21 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
                   {form.usage === "其他" && (
                     <input value={form.usageOther} onChange={(e) => update("usageOther", e.target.value)}
                       placeholder={t("add_usage_other_ph")}
-                      className="mt-1 rounded-lg border border-[#E4DFCF] px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D]" />
+                      className="mt-1 rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D]" />
                   )}
                 </>
               ) : (
                 <input value={form.usageOther} onChange={(e) => update("usageOther", e.target.value)}
                   placeholder={t("add_usage_other_ph")}
-                  className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D]" />
+                  className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D]" />
               )}
             </div>
 
             {form.category === "抹茶" && form.occasions.includes("純飲") && (
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] text-[#8A8371]">{t("add_teaStyle")}</label>
+                <label className="text-[14px] text-[#8A8371]">{t("add_teaStyle")}</label>
                 <select value={form.teaStyle} onChange={(e) => update("teaStyle", e.target.value)}
-                  className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D] bg-white">
+                  className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D] bg-white">
                   <option value="" disabled>{t("add_category_ph")}</option>
                   {TEA_STYLES.map((s) => <option key={s} value={s}>{TEA_STYLE_LABEL[s][lang]}</option>)}
                 </select>
@@ -1791,21 +1805,21 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
             )}
 
             <div className="md:col-span-2 flex flex-col gap-1">
-              <label className="text-[13px] text-[#8A8371]">{t("add_notes")}</label>
+              <label className="text-[14px] text-[#8A8371]">{t("add_notes")}</label>
               <textarea value={form.notes} onChange={(e) => update("notes", e.target.value)} rows={3}
-                className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D] resize-none" />
+                className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D] resize-none" />
             </div>
           </div>
 
           {weightSection}
 
           <div className="flex justify-end gap-2 mt-6">
-            <button onClick={cancelEdit} className="text-[13px] px-4 py-2 rounded-full text-[#6B6558] hover:bg-[#F1EEE3] transition">{t("add_cancel")}</button>
+            <button onClick={cancelEdit} className="text-[14px] px-4 py-2 rounded-full text-[#6B6558] hover:bg-[#F1EEE3] transition">{t("add_cancel")}</button>
             <button onClick={submit} disabled={!brandValid || !occasionValid || form.rating === 0 ||
               (form.status === "未開封" && !form.unsealedExpiry.trim()) ||
               (form.status === "已開封" && !form.openedDate.trim()) ||
               (form.status === "已用完" && !form.finishedDate.trim())}
-              className="text-[13px] px-5 py-2 rounded-full bg-[#2B7056] text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#1B4A38] transition">
+              className="text-[14px] px-5 py-2 rounded-full bg-[#2B7056] text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#1B4A38] transition">
               {t("add_save")}
             </button>
           </div>
@@ -1826,13 +1840,13 @@ function FavStar({ on, size = 22 }) {
 }
 
 /* ================= TAG helpers ================= */
-function Tag({ children, tone = "green", style }) {
+function Tag({ children, tone = "green", style, className = "" }) {
   const tones = {
     green: "bg-[#EAF3E8] text-[#2B7056] border-[#BDDBBD]",
     gold: "bg-[#F5EFE0] text-[#9C7A2E] border-[#E4D6AE]",
     neutral: "bg-[#F1EEE3] text-[#6B6558] border-[#E4DFCF]",
   };
-  return <span style={style} className={`text-[13px] px-2 py-0.5 rounded-full border ${style ? "" : tones[tone]}`}>{children}</span>;
+  return <span style={style} className={`text-[14px] px-2 py-0.5 rounded-full border ${style ? "" : tones[tone]} ${className}`}>{children}</span>;
 }
 // 茶品類別 label colours: 抹茶 = emerald green, 焙茶 = medium brown, 玄米茶 = muddy yellow
 const CATEGORY_TAG_STYLE = {
@@ -1842,7 +1856,7 @@ const CATEGORY_TAG_STYLE = {
 };
 function ViewField({ label, value }) {
   return (
-    <div className="flex items-baseline justify-between gap-4 text-[13px] py-3">
+    <div className="flex items-baseline justify-between gap-4 text-[14px] py-3">
       <span className="shrink-0 text-[#8A8371]">{label}</span>
       <span className="text-[#2E2A24] font-semibold text-right break-words min-w-0">{value}</span>
     </div>
@@ -1856,29 +1870,29 @@ function HomeTab({ lang, records, userEmail, nickname, isGuest, onAdd, onGoRecor
   return (
     <div>
       <header className="pt-10 pb-6">
-        <p className="text-[15px] text-[#8A8371]">{t("home_welcome")}</p>
+        <p className="text-[16px] text-[#8A8371]">{t("home_welcome")}</p>
         <h1 className="font-display text-2xl md:text-3xl text-[#1B4A38] font-700 mt-1">
           {nickname || (isGuest ? t("home_guest") : userEmail)}
         </h1>
-        <p className="mt-2 text-[13px] text-[#6B6558]">{t("tagline")}</p>
-        <button onClick={onAdd} className="mt-4 rounded-full bg-[#2B7056] hover:bg-[#1B4A38] text-white text-[13px] px-5 py-2.5 transition">
+        <p className="mt-2 text-[14px] text-[#6B6558]">{t("tagline")}</p>
+        <button onClick={onAdd} className="mt-4 rounded-full bg-[#2B7056] hover:bg-[#1B4A38] text-white text-[14px] px-5 py-2.5 transition">
           {t("home_addBtn")}
         </button>
         <div className="mt-6 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
       </header>
 
       <div className="mb-8">
-        <h2 className="font-display text-[16px] text-[#1B4A38] mb-3">{t("home_fav")}</h2>
+        <h2 className="font-display text-[17px] text-[#1B4A38] mb-3">{t("home_fav")}</h2>
         {records.filter((r) => r.favorite).length === 0 ? (
-          <p className="text-[13px] text-[#8A8371] py-4 text-center">{t("home_fav_empty")}</p>
+          <p className="text-[14px] text-[#8A8371] py-4 text-center">{t("home_fav_empty")}</p>
         ) : (
           <div className="flex flex-col gap-3">
             {records.filter((r) => r.favorite).map((r) => (
               <div key={r.id} className="flex items-start gap-4 rounded-2xl border border-[#E4DFCF] bg-white/70 p-4">
                 <RecordIcon record={r} size={48} />
                 <div className="min-w-0 flex-1">
-                  <p className="font-display text-[16px] text-[#1B4A38] truncate">{r.brand}</p>
-                  <p className="text-[13px] text-[#8A8371] truncate">{r.cultivar || "—"}{Number(r.initialWeight) > 0 ? ` · ${r.initialWeight} g` : ""}</p>
+                  <p className="font-display text-[17px] text-[#1B4A38] truncate">{r.brand}</p>
+                  <p className="text-[14px] text-[#8A8371] truncate">{r.cultivar || "—"}{Number(r.initialWeight) > 0 ? ` · ${r.initialWeight} g` : ""}</p>
                   <div className="mt-1.5"><Stars value={r.rating} /></div>
                 </div>
               </div>
@@ -1888,56 +1902,17 @@ function HomeTab({ lang, records, userEmail, nickname, isGuest, onAdd, onGoRecor
       </div>
 
       <div className="flex items-center justify-between mb-3">
-        <h2 className="font-display text-[16px] text-[#1B4A38]">{t("home_recent")}</h2>
+        <h2 className="font-display text-[17px] text-[#1B4A38]">{t("home_recent")}</h2>
         {records.length > 0 && (
-          <button onClick={onGoRecords} className="text-[13px] px-4 py-1.5 hover:bg-[#EAF3E8] transition">{t("home_viewAll")}</button>
+          <button onClick={onGoRecords} className="text-[14px] px-4 py-1.5 hover:bg-[#EAF3E8] transition">{t("home_viewAll")}</button>
         )}
       </div>
 
       {recent.length === 0 ? (
-        <p className="text-[13px] text-[#8A8371] py-10 text-center">{t("home_empty")}</p>
+        <p className="text-[14px] text-[#8A8371] py-10 text-center">{t("home_empty")}</p>
       ) : (
         <div className="flex flex-col gap-3">
-          {recent.map((r) => {
-            const status = computeStatus(r);
-            const statusLabel = status === "使用中" ? t("status_inUse") : status === "已用完" ? t("status_used") : t("status_unopened");
-            return (
-              <div key={r.id} className="flex items-start gap-4 rounded-2xl border border-[#E4DFCF] bg-white/70 p-4">
-                <RecordIcon record={r} size={48} />
-                <div className="min-w-0 flex-1">
-                  <p className="font-display text-[16px] text-[#1B4A38] truncate">{r.cultivar || r.brand}</p>
-                  <p className="text-[13px] text-[#8A8371] truncate">{r.brand}{r.origin ? ` · ${r.origin}` : ""}</p>
-                  <div className="mt-1.5"><Stars value={r.rating} /></div>
-                </div>
-                <div className="flex flex-col items-end gap-1 shrink-0 pl-2 pt-1 text-right">
-                  <Tag tone="gold">{statusLabel}</Tag>
-                  {status === "未開封" && r.unsealedExpiry && (
-                    <span className="text-[13px] text-[#B0A990]">{t("label_validUntil")} {r.unsealedExpiry}</span>
-                  )}
-                  {status === "已用完" && (() => {
-                    const finished = lastUsageDate(r);
-                    return finished ? <span className="text-[13px] text-[#B0A990]">{t("status_finishedDate")} {finished}</span> : null;
-                  })()}
-                  {status === "使用中" && (() => {
-                    const remaining = computeRemaining(r);
-                    const openedDay = daysSince(r.openedDate);
-                    const opened = parseDMY(r.openedDate);
-                    const target = opened ? new Date(opened.getTime() + (Number(r.expiryDays) || 30) * 86400000) : null;
-                    const untilExpiry = target ? daysFromToday(target) : null;
-                    return (
-                      <div className="flex flex-col items-end gap-0.5 text-[13px] text-[#B0A990]">
-                        {Number(r.initialWeight) > 0 && <span>{remaining}g</span>}
-                        {openedDay !== null && <span>{t("status_openedDay")}{openedDay + 1}{t("status_openedDaySuffix")}</span>}
-                        {untilExpiry !== null && (
-                          <span>{t("status_untilExpiry")} {Math.max(0, untilExpiry)}{t("status_daySuffix")}</span>
-                        )}
-                      </div>
-                    );
-                  })()}
-                </div>
-              </div>
-            );
-          })}
+          {recent.map((r) => <RecordListCard key={r.id} r={r} lang={lang} t={t} compact />)}
         </div>
       )}
     </div>
@@ -1963,6 +1938,84 @@ function topOccasion(records) {
 function avgRating(records) {
   if (records.length === 0) return "—";
   return (records.reduce((s, r) => s + r.rating, 0) / records.length).toFixed(1);
+}
+
+/* shared list card: used by the Records tab and the Home "recent" list so both look identical */
+function RecordListCard({ r, lang, t, onClick, compact = false }) {
+  const status = computeStatus(r);
+  const statusLabel = status === "使用中" ? t("status_inUse") : status === "已用完" ? t("status_used") : t("status_unopened");
+
+  // Left cells (one per row) and right cells (status + info) are laid out in the same grid,
+  // so each right-hand item sits on the same line as its left-hand row, with even row spacing.
+  const left = [];
+  left.push(<p key="title" className="font-display text-[17px] text-[#1B4A38] break-words leading-snug">{r.cultivar || r.brand}</p>);
+  left.push(<p key="brand" className="text-[14px] text-[#8A8371] break-words leading-snug">{r.brand}</p>);
+  left.push(<div key="stars"><Stars value={r.rating} /></div>);
+  left.push(
+    <div key="cat" className="flex flex-nowrap gap-1.5 min-w-0">
+      {r.category && <Tag tone="neutral" style={CATEGORY_TAG_STYLE[r.category]} className="whitespace-nowrap">{CATEGORY_LABEL[r.category] ? CATEGORY_LABEL[r.category][lang] : r.category}</Tag>}
+      {r.usage && <Tag tone="gold" className="whitespace-nowrap">{USAGE_LABEL[r.usage] ? USAGE_LABEL[r.usage][lang] : r.usage}</Tag>}
+      {!compact && r.teaStyle && <Tag tone="gold" className="whitespace-nowrap">{TEA_STYLE_LABEL[r.teaStyle] ? TEA_STYLE_LABEL[r.teaStyle][lang] : r.teaStyle}</Tag>}
+    </div>
+  );
+  if (!compact && (r.occasions || []).length > 0) {
+    left.push(
+      <div key="occ" className="flex flex-nowrap gap-1.5 min-w-0">
+        {(r.occasions || []).slice(0, 2).map((o) => <Tag key={o} tone="neutral" className="min-w-0 truncate whitespace-nowrap">{OCC_LABEL[o] ? OCC_LABEL[o][lang] : o}</Tag>)}
+      </div>
+    );
+  }
+  if (!compact) {
+    const srcLabel = r.priceSource ? (PRICE_SOURCE_LABEL[r.priceSource] ? PRICE_SOURCE_LABEL[r.priceSource][lang] : r.priceSource) : "";
+    const priceText = r.currency === PRICE_NA
+      ? `${t("price_na")}${srcLabel ? ` (${srcLabel})` : ""}`
+      : (r.price ? `${r.currency || ""} ${r.price}` : "");
+    const approx = r.currency === PRICE_NA ? null : hkdApprox(r.price, r.currency, lang);
+    if (priceText) {
+      left.push(<p key="price" className="text-[14px] text-[#8A8371] whitespace-nowrap">{priceText}{approx && <span className="text-[#B0A990] ml-1.5">{approx}</span>}</p>);
+    }
+  }
+
+  const infoCls = "text-[14px] text-[#B0A990] whitespace-nowrap";
+  const right = [<Tag key="status" tone="gold">{statusLabel}</Tag>];
+  if (status === "未開封" && r.unsealedExpiry) {
+    right.push(<span key="exp" className={infoCls}>{t("label_validUntil")} {r.unsealedExpiry}</span>);
+  }
+  if (status === "已用完" && !compact) {
+    const finished = r.finishedDate || lastUsageDate(r);
+    if (finished) right.push(<span key="fin" className={infoCls}>{t("status_finishedDate")} {finished}</span>);
+  }
+  if (status === "使用中") {
+    const remaining = computeRemaining(r);
+    const openedDay = daysSince(r.openedDate);
+    if (Number(r.initialWeight) > 0) right.push(<span key="rem" className={infoCls}>{remaining}g</span>);
+    if (openedDay !== null) {
+      right.push(<span key="day" className={`text-[14px] whitespace-nowrap ${openedDay + 1 >= 31 ? "text-[#C0392B]" : "text-[#B0A990]"}`}>{t("status_openedDay")}{openedDay + 1}{t("status_openedDaySuffix")}</span>);
+    }
+  }
+
+  const rows = Math.max(left.length, right.length);
+  const cells = [];
+  for (let i = 0; i < rows; i++) {
+    const l = left[i], rr = right[i];
+    cells.push(
+      <div key={`l${i}`} className={`min-h-[28px] flex items-center min-w-0 ${rr ? "" : "col-span-2"}`}>{l}</div>
+    );
+    if (rr) cells.push(<div key={`r${i}`} className="min-h-[28px] flex items-center justify-end text-right">{rr}</div>);
+    if (!l && rr) { /* right-only row: leave left cell empty (already pushed) */ }
+  }
+
+  return (
+    <article onClick={onClick}
+      className="group relative rounded-2xl border border-[#E4DFCF] bg-white/70 p-4 hover:shadow-md hover:border-[#8DC48D] transition cursor-pointer">
+      <div className="flex items-start gap-4">
+        <RecordIcon record={r} size={72} />
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 flex-1 min-w-0 items-center">
+          {cells}
+        </div>
+      </div>
+    </article>
+  );
 }
 
 /* ================= RECORDS TAB ================= */
@@ -2033,7 +2086,7 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
       <header className="pt-10 pb-6">
         <div className="flex items-center justify-between gap-3">
           <h1 className="font-display text-2xl md:text-3xl text-[#1B4A38] font-700">{t("records_title")}</h1>
-          <button onClick={onAdd} className="rounded-full bg-[#2B7056] hover:bg-[#1B4A38] text-white text-[13px] px-4 py-2 transition shrink-0">
+          <button onClick={onAdd} className="rounded-full bg-[#2B7056] hover:bg-[#1B4A38] text-white text-[14px] px-4 py-2 transition shrink-0">
             {t("home_addBtn")}
           </button>
         </div>
@@ -2042,69 +2095,69 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
 
       <section className="grid grid-cols-2 gap-3 mb-6">
         <div className="rounded-2xl border border-[#E4DFCF] bg-white/60 px-4 py-3 flex flex-col gap-0.5">
-          <span className="text-[16px] tracking-wider text-[#8A8371]">{t("records_totalUsed")}</span>
-          <span className="font-display text-[16px] text-[#2B7056]">{totalUsedGrams}g</span>
+          <span className="text-[17px] tracking-wider text-[#8A8371]">{t("records_totalUsed")}</span>
+          <span className="font-display text-[17px] text-[#2B7056]">{totalUsedGrams}g</span>
         </div>
         <div className="rounded-2xl border border-[#E4DFCF] bg-white/60 px-4 py-3 flex flex-col gap-0.5">
-          <span className="text-[16px] tracking-wider text-[#8A8371]">{t("records_usageCount")}</span>
-          <span className="font-display text-[16px] text-[#2B7056]">{totalUsageCount}{t("records_countUnit")}</span>
+          <span className="text-[17px] tracking-wider text-[#8A8371]">{t("records_usageCount")}</span>
+          <span className="font-display text-[17px] text-[#2B7056]">{totalUsageCount}{t("records_countUnit")}</span>
         </div>
       </section>
 
       <section className="flex flex-col gap-3 mb-6">
         <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("records_search")}
-          className="w-full rounded-full border border-[#E4DFCF] bg-white px-4 py-2.5 text-[13px] outline-none focus:border-[#8DC48D] focus:ring-2 focus:ring-[#BDDBBD] transition" />
+          className="w-full rounded-full border border-[#E4DFCF] bg-white px-4 py-2.5 text-[14px] outline-none focus:border-[#8DC48D] focus:ring-2 focus:ring-[#BDDBBD] transition" />
 
         <div className="flex flex-wrap gap-2 items-center">
           {["全部", "使用中", "未開封", "已用完"].map((s) => (
             <button key={s} onClick={() => setStatusFilter(s)}
-              className={`text-[13px] px-3 py-1.5 rounded-full border transition ${statusFilter === s ? "btn-brown" : ""}`}>
+              className={`text-[14px] px-3 py-1.5 rounded-full border transition ${statusFilter === s ? "btn-brown" : ""}`}>
               {s === "全部" ? t("status_all") : s === "使用中" ? t("status_inUse") : s === "未開封" ? t("status_unopened") : t("status_used")}
             </button>
           ))}
         </div>
 
         <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-[13px] text-[#8A8371] mr-1">{t("filter_category")}</span>
+          <span className="text-[14px] text-[#8A8371] mr-1">{t("filter_category")}</span>
           {["全部", "抹茶", "焙茶", "玄米茶", "其他"].map((c) => (
             <button key={c} onClick={() => { setCategoryFilter(c); setOccFilter("全部"); }}
-              className={`text-[13px] px-3 py-1.5 rounded-full border transition ${categoryFilter === c ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+              className={`text-[14px] px-3 py-1.5 rounded-full border transition ${categoryFilter === c ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
               {c === "全部" ? t("filter_all") : (CATEGORY_LABEL[c] ? CATEGORY_LABEL[c][lang] : c)}
             </button>
           ))}
         </div>
 
         <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-[13px] text-[#8A8371] mr-1">{t("filter_occasion")}</span>
+          <span className="text-[14px] text-[#8A8371] mr-1">{t("filter_occasion")}</span>
           {["全部", ...occasionChoices].map((o) => (
             <button key={o} onClick={() => setOccFilter(o)}
-              className={`text-[13px] px-3 py-1.5 rounded-full border transition ${occFilter === o ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+              className={`text-[14px] px-3 py-1.5 rounded-full border transition ${occFilter === o ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
               {o === "全部" ? t("filter_all") : OCC_LABEL[o][lang]}
             </button>
           ))}
         </div>
 
         <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-[13px] text-[#8A8371] mr-1">{t("filter_price")}</span>
+          <span className="text-[14px] text-[#8A8371] mr-1">{t("filter_price")}</span>
           <button onClick={() => { setPriceSort(priceSort === "asc" ? null : "asc"); setUsageSort(null); }}
-            className={`text-[13px] px-3 py-1.5 rounded-full border transition ${priceSort === "asc" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+            className={`text-[14px] px-3 py-1.5 rounded-full border transition ${priceSort === "asc" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
             {t("price_asc")}
           </button>
           <button onClick={() => { setPriceSort(priceSort === "desc" ? null : "desc"); setUsageSort(null); }}
-            className={`text-[13px] px-3 py-1.5 rounded-full border transition ${priceSort === "desc" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+            className={`text-[14px] px-3 py-1.5 rounded-full border transition ${priceSort === "desc" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
             {t("price_desc")}
           </button>
         </div>
 
         {statusFilter === "使用中" && (
           <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-[13px] text-[#8A8371] mr-1">{t("filter_usageDate")}</span>
+            <span className="text-[14px] text-[#8A8371] mr-1">{t("filter_usageDate")}</span>
             <button onClick={() => { setUsageSort(usageSort === "earliest" ? null : "earliest"); setPriceSort(null); }}
-              className={`text-[13px] px-3 py-1.5 rounded-full border transition ${usageSort === "earliest" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+              className={`text-[14px] px-3 py-1.5 rounded-full border transition ${usageSort === "earliest" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
               {t("usage_earliest")}
             </button>
             <button onClick={() => { setUsageSort(usageSort === "latest" ? null : "latest"); setPriceSort(null); }}
-              className={`text-[13px] px-3 py-1.5 rounded-full border transition ${usageSort === "latest" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+              className={`text-[14px] px-3 py-1.5 rounded-full border transition ${usageSort === "latest" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
               {t("usage_latest")}
             </button>
           </div>
@@ -2112,68 +2165,10 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
       </section>
 
       {filtered.length === 0 ? (
-        <p className="text-center py-20 text-[#8A8371] text-[13px]">{t("records_empty")}</p>
+        <p className="text-center py-20 text-[#8A8371] text-[14px]">{t("records_empty")}</p>
       ) : (
         <div className="flex flex-col gap-3">
-          {filtered.map((r) => {
-            const status = computeStatus(r);
-            const statusLabel = status === "使用中" ? t("status_inUse") : status === "已用完" ? t("status_used") : t("status_unopened");
-            return (
-              <article key={r.id} onClick={() => onEdit(r)}
-                className="group relative flex items-start gap-4 rounded-2xl border border-[#E4DFCF] bg-white/70 p-4 hover:shadow-md hover:border-[#8DC48D] transition cursor-pointer">
-                <RecordIcon record={r} size={56} />
-                <div className="min-w-0 flex-1">
-                  <p className="font-display text-[16px] text-[#1B4A38] truncate">{r.cultivar || r.brand}</p>
-                  <div className="flex items-center gap-1.5 text-[13px] text-[#8A8371] truncate">
-                    <span>{r.brand}</span>
-                    {r.origin && <span>· {r.origin}</span>}
-                  </div>
-                  <div className="mt-1.5"><Stars value={r.rating} /></div>
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    {r.category && <Tag tone="neutral" style={CATEGORY_TAG_STYLE[r.category]}>{CATEGORY_LABEL[r.category] ? CATEGORY_LABEL[r.category][lang] : r.category}</Tag>}
-                    {(r.occasions || []).slice(0, 2).map((o) => <Tag key={o} tone="neutral">{OCC_LABEL[o] ? OCC_LABEL[o][lang] : o}</Tag>)}
-                    {r.usage && <Tag tone="gold">{USAGE_LABEL[r.usage] ? USAGE_LABEL[r.usage][lang] : r.usage}</Tag>}
-                    {r.teaStyle && <Tag tone="gold">{TEA_STYLE_LABEL[r.teaStyle] ? TEA_STYLE_LABEL[r.teaStyle][lang] : r.teaStyle}</Tag>}
-                  </div>
-                  <p className="text-[13px] text-[#B0A990] mt-2">
-                    {(() => {
-                      const srcLabel = r.priceSource ? (PRICE_SOURCE_LABEL[r.priceSource] ? PRICE_SOURCE_LABEL[r.priceSource][lang] : r.priceSource) : "";
-                      const priceText = r.currency === PRICE_NA
-                        ? `${t("price_na")}${srcLabel ? ` (${srcLabel})` : ""}`
-                        : (r.price ? `${r.currency || ""} ${r.price}` : "");
-                      return `${priceText}${priceText && r.purchaseDate ? " · " : ""}${r.purchaseDate || ""}`;
-                    })()}
-                  </p>
-                </div>
-                <div className="flex flex-col items-end gap-1 shrink-0 pl-2 pt-1 text-right">
-                  <Tag tone="gold">{statusLabel}</Tag>
-                  {status === "未開封" && r.unsealedExpiry && (
-                    <span className="text-[13px] text-[#B0A990]">{t("label_validUntil")} {r.unsealedExpiry}</span>
-                  )}
-                  {status === "已用完" && (() => {
-                    const finished = r.finishedDate || lastUsageDate(r);
-                    return finished ? <span className="text-[13px] text-[#B0A990]">{t("status_finishedDate")} {finished}</span> : null;
-                  })()}
-                  {status === "使用中" && (() => {
-                    const remaining = computeRemaining(r);
-                    const openedDay = daysSince(r.openedDate);
-                    const opened = parseDMY(r.openedDate);
-                    const target = opened ? new Date(opened.getTime() + (Number(r.expiryDays) || 30) * 86400000) : null;
-                    const untilExpiry = target ? daysFromToday(target) : null;
-                    return (
-                      <div className="flex flex-col items-end gap-0.5 text-[13px] text-[#B0A990]">
-                        {Number(r.initialWeight) > 0 && <span>{remaining}g</span>}
-                        {openedDay !== null && <span>{t("status_openedDay")}{openedDay + 1}{t("status_openedDaySuffix")}</span>}
-                        {untilExpiry !== null && (
-                          <span>{t("status_untilExpiry")} {Math.max(0, untilExpiry)}{t("status_daySuffix")}</span>
-                        )}
-                      </div>
-                    );
-                  })()}
-                </div>
-              </article>
-            );
-          })}
+          {filtered.map((r) => <RecordListCard key={r.id} r={r} lang={lang} t={t} onClick={() => onEdit(r)} />)}
         </div>
       )}
 
@@ -2236,7 +2231,7 @@ function ExpiryTab({ lang, records, onUpdate }) {
       </header>
 
       {rows.length === 0 ? (
-        <p className="text-center py-20 text-[#8A8371] text-[13px]">{t("expiry_empty")}</p>
+        <p className="text-center py-20 text-[#8A8371] text-[14px]">{t("expiry_empty")}</p>
       ) : (
         <div className="flex flex-col gap-3">
           {rows.map(({ r, target, days }) => {
@@ -2248,26 +2243,26 @@ function ExpiryTab({ lang, records, onUpdate }) {
                 <div className="flex gap-4 items-start">
                   <RecordIcon record={r} size={48} />
                   <div className="min-w-0 flex-1">
-                    <p className="font-display text-[16px] text-[#1B4A38] truncate">{r.cultivar || r.brand}</p>
-                    <p className="text-[13px] text-[#8A8371] truncate">{r.brand}{r.origin ? ` · ${r.origin}` : ""}</p>
+                    <p className="font-display text-[17px] text-[#1B4A38] truncate">{r.cultivar || r.brand}</p>
+                    <p className="text-[14px] text-[#8A8371] truncate">{r.brand}{r.origin ? ` · ${r.origin}` : ""}</p>
                     <div className="flex flex-wrap gap-1.5 mt-1.5">
                       {r.category && <Tag tone="neutral" style={CATEGORY_TAG_STYLE[r.category]}>{CATEGORY_LABEL[r.category] ? CATEGORY_LABEL[r.category][lang] : r.category}</Tag>}
                     </div>
                     <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                      <span className={`inline-block text-[13px] px-2 py-0.5 rounded-full border ${b.cls}`}>{b.text}</span>
+                      <span className={`inline-block text-[14px] px-2 py-0.5 rounded-full border ${b.cls}`}>{b.text}</span>
                       {targetStr && (
-                        <span className="text-[13px] text-[#45320F]">{t("expiry_dateLabel")} {targetStr}</span>
+                        <span className="text-[14px] text-[#45320F]">{t("expiry_dateLabel")} {targetStr}</span>
                       )}
                       {Number(r.initialWeight) > 0 && (
-                        <span className="text-[13px] text-[#8A8371]">{t("weight_remaining")} {computeRemaining(r)}g</span>
+                        <span className="text-[14px] text-[#8A8371]">{t("weight_remaining")} {computeRemaining(r)}g</span>
                       )}
                       {r.openedDate && Number(r.expiryDays) !== 30 && (
-                        <span className="text-[13px] text-[#B0A990]">{t("expiry_days")} {r.expiryDays}</span>
+                        <span className="text-[14px] text-[#B0A990]">{t("expiry_days")} {r.expiryDays}</span>
                       )}
                     </div>
                   </div>
                   <button onClick={() => toggleStatus(r)}
-                    className="text-[13px] px-3 py-1.5 rounded-full border border-[#8DC48D] text-[#2B7056] hover:bg-[#EAF3E8] transition shrink-0">
+                    className="text-[14px] px-3 py-1.5 rounded-full border border-[#8DC48D] text-[#2B7056] hover:bg-[#EAF3E8] transition shrink-0">
                     {r.openedDate ? t("expiry_markUnopened") : t("expiry_markOpened")}
                   </button>
                 </div>
@@ -2275,15 +2270,15 @@ function ExpiryTab({ lang, records, onUpdate }) {
                 {r.openedDate && (
                   <div className="grid grid-cols-2 gap-3 mt-3 pl-[64px]">
                     <div className="flex flex-col gap-1">
-                      <label className="text-[13px] text-[#8A8371]">{t("expiry_openedDate")}</label>
+                      <label className="text-[14px] text-[#8A8371]">{t("expiry_openedDate")}</label>
                       <input value={r.openedDate} onChange={(e) => onUpdate(r.id, { openedDate: formatDMYInput(e.target.value) })}
-                        className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-[13px] outline-none focus:border-[#8DC48D]" />
+                        className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-[14px] outline-none focus:border-[#8DC48D]" />
                     </div>
                     <div className="flex flex-col gap-1">
-                      <label className="text-[13px] text-[#8A8371]">{t("expiry_days")}</label>
+                      <label className="text-[14px] text-[#8A8371]">{t("expiry_days")}</label>
                       <input type="number" min={1} max={30} value={r.expiryDays}
                         onChange={(e) => onUpdate(r.id, { expiryDays: Math.min(30, Math.max(1, Number(e.target.value) || 1)) })}
-                        className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-[13px] outline-none focus:border-[#8DC48D]" />
+                        className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-[14px] outline-none focus:border-[#8DC48D]" />
                     </div>
                   </div>
                 )}
@@ -2312,7 +2307,7 @@ function pieGradient(rows) {
 }
 // wrap a brand name into lines that fit a given pixel width (13px text); breaks at spaces when possible
 function wrapBrand(name, maxW) {
-  const cw = (c) => (/[\u2e80-\u9fff\uff00-\uffef]/.test(c) ? 13 : 8.5);
+  const cw = (c) => (/[\u2e80-\u9fff\uff00-\uffef]/.test(c) ? 14 : 9.2);
   const lines = [];
   let cur = "", w = 0;
   for (const ch of name) {
@@ -2381,27 +2376,27 @@ function StatsTab({ lang, records }) {
       </header>
 
       <div className="flex flex-wrap gap-2 items-center mb-2">
-        <span className="text-[13px] text-[#8A8371] mr-1">{t("stats_filterYear")}</span>
+        <span className="text-[14px] text-[#8A8371] mr-1">{t("stats_filterYear")}</span>
         <button onClick={() => setPeriodYear("全部")}
-          className={`text-[13px] px-3 py-1.5 rounded-full border transition ${periodYear === "全部" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+          className={`text-[14px] px-3 py-1.5 rounded-full border transition ${periodYear === "全部" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
           {t("filter_all")}
         </button>
         {years.map((y) => (
           <button key={y} onClick={() => setPeriodYear(y)}
-            className={`text-[13px] px-3 py-1.5 rounded-full border transition ${periodYear === y ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+            className={`text-[14px] px-3 py-1.5 rounded-full border transition ${periodYear === y ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
             {y}
           </button>
         ))}
       </div>
       <div className="flex flex-wrap gap-2 items-center mb-6">
-        <span className="text-[13px] text-[#8A8371] mr-1">{t("stats_filterMonth")}</span>
+        <span className="text-[14px] text-[#8A8371] mr-1">{t("stats_filterMonth")}</span>
         <button onClick={() => setPeriodMonth("全部")}
-          className={`text-[13px] px-3 py-1.5 rounded-full border transition ${periodMonth === "全部" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+          className={`text-[14px] px-3 py-1.5 rounded-full border transition ${periodMonth === "全部" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
           {t("filter_all")}
         </button>
         {months.map((m) => (
           <button key={m} onClick={() => setPeriodMonth(m)}
-            className={`text-[13px] px-3 py-1.5 rounded-full border transition ${periodMonth === m ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+            className={`text-[14px] px-3 py-1.5 rounded-full border transition ${periodMonth === m ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
             {m}
           </button>
         ))}
@@ -2415,8 +2410,8 @@ function StatsTab({ lang, records }) {
           { label: t("stat_avg"), value: avgRating(filteredRecords) === "—" ? "—" : `${avgRating(filteredRecords)} ★` },
         ].map((s) => (
           <div key={s.label} className="rounded-2xl border border-[#E4DFCF] bg-white/60 px-4 py-4 flex flex-col gap-1">
-            <span className="text-[16px] tracking-wider text-[#8A8371]">{s.label}</span>
-            <span className="font-display text-[16px] text-[#2B7056] truncate">{s.value}</span>
+            <span className="text-[17px] tracking-wider text-[#8A8371]">{s.label}</span>
+            <span className="font-display text-[17px] text-[#2B7056] truncate">{s.value}</span>
           </div>
         ))}
       </section>
@@ -2424,15 +2419,15 @@ function StatsTab({ lang, records }) {
       {filteredRecords.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h2 className="font-display text-[16px] text-[#1B4A38] mb-3">{t("stats_brandBreakdown")}</h2>
+            <h2 className="font-display text-[17px] text-[#1B4A38] mb-3">{t("stats_brandBreakdown")}</h2>
             {(() => {
               const maxCount = max(brandRows);
               const niceMax = Math.max(5, Math.ceil(maxCount / 5) * 5);
               const tickCount = 5;
-              const barW = 48, gap = 28, leftPad = 32, topPad = 16, chartH = 140;
+              const barW = 48, gap = 28, leftPad = 34, topPad = 16, chartH = 140;
               const wrapped = brandRows.map(([n]) => wrapBrand(n, barW + gap - 4));
               const maxLines = Math.max(1, ...wrapped.map((l) => l.length));
-              const bottomPad = 14 + maxLines * 16 + 6;
+              const bottomPad = 14 + maxLines * 17 + 6;
               const chartW = brandRows.length * (barW + gap) + gap;
               const svgW = leftPad + chartW;
               const svgH = topPad + chartH + bottomPad;
@@ -2446,7 +2441,7 @@ function StatsTab({ lang, records }) {
                       return (
                         <g key={i}>
                           <line x1={leftPad} y1={y} x2={svgW} y2={y} stroke="#E4DFCF" strokeWidth="1" />
-                          <text x={leftPad - 6} y={y + 3} textAnchor="end" fontSize="13" fill="#8A8371">{val}</text>
+                          <text x={leftPad - 6} y={y + 3} textAnchor="end" fontSize="14" fill="#8A8371">{val}</text>
                         </g>
                       );
                     })}
@@ -2457,9 +2452,9 @@ function StatsTab({ lang, records }) {
                       return (
                         <g key={name}>
                           <rect x={x} y={y} width={barW} height={Math.max(1, barH)} fill="#8DC48D" />
-                          <text x={x + barW / 2} y={y - 4} textAnchor="middle" fontSize="13" fill="#2B7056" fontWeight="600">{count}</text>
-                          <text x={x + barW / 2} y={topPad + chartH + 18} textAnchor="middle" fontSize="13" fill="#6B6558">
-                            {wrapped[i].map((ln, k) => <tspan key={k} x={x + barW / 2} dy={k === 0 ? 0 : 16}>{ln}</tspan>)}
+                          <text x={x + barW / 2} y={y - 4} textAnchor="middle" fontSize="14" fill="#2B7056" fontWeight="600">{count}</text>
+                          <text x={x + barW / 2} y={topPad + chartH + 18} textAnchor="middle" fontSize="14" fill="#6B6558">
+                            {wrapped[i].map((ln, k) => <tspan key={k} x={x + barW / 2} dy={k === 0 ? 0 : 17}>{ln}</tspan>)}
                           </text>
                         </g>
                       );
@@ -2471,7 +2466,7 @@ function StatsTab({ lang, records }) {
             })()}
           </div>
           <div>
-            <h2 className="font-display text-[16px] text-[#1B4A38] mb-3">{t("stats_occasionBreakdown")}</h2>
+            <h2 className="font-display text-[17px] text-[#1B4A38] mb-3">{t("stats_occasionBreakdown")}</h2>
             <div className="flex items-center justify-center gap-6">
               <svg width="128" height="128" viewBox="0 0 128 128" className="shrink-0">
                 {(() => {
@@ -2495,14 +2490,14 @@ function StatsTab({ lang, records }) {
                   });
                 })()}
                 <circle cx="64" cy="64" r="41" fill="#FFFFFF" />
-                <text x="64" y="69" textAnchor="middle" className="font-display" fontSize="15" fill="#2B7056">{filteredRecords.length}</text>
+                <text x="64" y="69" textAnchor="middle" className="font-display" fontSize="16" fill="#2B7056">{filteredRecords.length}</text>
               </svg>
               <div className="flex flex-col gap-1.5">
                 {occRows.map(([name, count], i) => (
                   <div key={name} className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
-                    <span className="text-[13px] text-[#6B6558]">{OCC_LABEL[name] ? OCC_LABEL[name][lang] : name}</span>
-                    <span className="text-[13px] text-[#B0A990]">({count})</span>
+                    <span className="text-[14px] text-[#6B6558]">{OCC_LABEL[name] ? OCC_LABEL[name][lang] : name}</span>
+                    <span className="text-[14px] text-[#B0A990]">({count})</span>
                   </div>
                 ))}
               </div>
@@ -2573,34 +2568,34 @@ function FeedbackTab({ lang }) {
 
       <section className="rounded-3xl border border-[#E4DFCF] bg-white/70 p-6 max-w-xl">
         {sent && (
-          <p className="text-[13px] text-[#2B7056] bg-[#EAF3E8] border border-[#BDDBBD] rounded-lg px-3 py-2 mb-4">{t("feedback_thanks")}</p>
+          <p className="text-[14px] text-[#2B7056] bg-[#EAF3E8] border border-[#BDDBBD] rounded-lg px-3 py-2 mb-4">{t("feedback_thanks")}</p>
         )}
         {failed && (
-          <p className="text-[13px] text-[#A24B3A] bg-[#F7EAE6] border border-[#EBCFC6] rounded-lg px-3 py-2 mb-4">{t("feedback_error")}</p>
+          <p className="text-[14px] text-[#A24B3A] bg-[#F7EAE6] border border-[#EBCFC6] rounded-lg px-3 py-2 mb-4">{t("feedback_error")}</p>
         )}
         <div className="flex flex-col gap-1 mb-4">
-          <label className="text-[13px] text-[#8A8371]">{t("feedback_category")}</label>
+          <label className="text-[14px] text-[#8A8371]">{t("feedback_category")}</label>
           <div className="flex gap-2">
             {CATS.map((c) => (
               <button key={c.key} onClick={() => setCat(c.key)}
-                className={`text-[13px] px-3 py-1.5 rounded-full border transition ${cat === c.key ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+                className={`text-[14px] px-3 py-1.5 rounded-full border transition ${cat === c.key ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
                 {c.label}
               </button>
             ))}
           </div>
         </div>
         <div className="flex flex-col gap-1 mb-4">
-          <label className="text-[13px] text-[#8A8371]">{t("feedback_message")}</label>
+          <label className="text-[14px] text-[#8A8371]">{t("feedback_message")}</label>
           <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={4} placeholder={t("feedback_message_ph")}
-            className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D] resize-none" />
+            className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D] resize-none" />
         </div>
         <div className="flex flex-col gap-1 mb-5">
-          <label className="text-[13px] text-[#8A8371]">{t("feedback_email")}</label>
+          <label className="text-[14px] text-[#8A8371]">{t("feedback_email")}</label>
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com"
-            className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[13px] outline-none focus:border-[#8DC48D]" />
+            className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D]" />
         </div>
         <button onClick={submit} disabled={sending || !message.trim()}
-          className="rounded-full bg-[#2B7056] text-white text-[13px] px-5 py-2.5 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#1B4A38] transition">
+          className="rounded-full bg-[#2B7056] text-white text-[14px] px-5 py-2.5 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#1B4A38] transition">
           {sending ? t("feedback_sending") : t("feedback_submit")}
         </button>
       </section>
@@ -2657,24 +2652,24 @@ function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, 
       </header>
 
       <section className="rounded-3xl border border-[#E4DFCF] bg-white/70 p-6 max-w-xl mb-6">
-        <h2 className="font-display text-[16px] text-[#1B4A38] mb-3">{t("settings_account")}</h2>
+        <h2 className="font-display text-[17px] text-[#1B4A38] mb-3">{t("settings_account")}</h2>
         {isGuest ? (
           <>
-            <p className="text-[13px] text-[#6B6558] mb-4">{t("settings_guest_hint")}</p>
+            <p className="text-[14px] text-[#6B6558] mb-4">{t("settings_guest_hint")}</p>
             {editingNick ? (
               <div className="flex flex-col gap-3">
-                <label className="text-[16px] text-[#8A8371]">{t("settings_nick_label")}</label>
+                <label className="text-[17px] text-[#8A8371]">{t("settings_nick_label")}</label>
                 <input value={nickDraft} onChange={(e) => setNickDraft(e.target.value)} placeholder="例：抹茶拿鐵愛好者" autoFocus
-                  className="rounded-lg border border-[#E4DFCF] px-3 py-2.5 text-[13px] outline-none focus:border-[#8DC48D] focus:ring-2 focus:ring-[#BDDBBD] transition" />
+                  className="rounded-lg border border-[#E4DFCF] px-3 py-2.5 text-[14px] outline-none focus:border-[#8DC48D] focus:ring-2 focus:ring-[#BDDBBD] transition" />
                 <div className="flex gap-2">
-                  <button onClick={() => { onSetNickname(nickDraft.trim() || "訪客"); setEditingNick(false); }} className="btn-brown text-[13px] px-5 py-2 rounded-full border">{t("settings_nick_save")}</button>
-                  <button onClick={() => setEditingNick(false)} className="text-[13px] px-5 py-2 rounded-full border">{t("add_cancel")}</button>
+                  <button onClick={() => { onSetNickname(nickDraft.trim() || "訪客"); setEditingNick(false); }} className="btn-brown text-[14px] px-5 py-2 rounded-full border">{t("settings_nick_save")}</button>
+                  <button onClick={() => setEditingNick(false)} className="text-[14px] px-5 py-2 rounded-full border">{t("add_cancel")}</button>
                 </div>
               </div>
             ) : (
               <>
-                <p className="text-[16px] text-[#1B4A38] font-medium mb-4">{nickname || "訪客"}</p>
-                <button onClick={() => { setNickDraft(nickname || ""); setEditingNick(true); }} className="text-[13px] px-5 py-2.5 rounded-full border">
+                <p className="text-[17px] text-[#1B4A38] font-medium mb-4">{nickname || "訪客"}</p>
+                <button onClick={() => { setNickDraft(nickname || ""); setEditingNick(true); }} className="text-[14px] px-5 py-2.5 rounded-full border">
                   {t("settings_login_btn")}
                 </button>
               </>
@@ -2682,39 +2677,39 @@ function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, 
           </>
         ) : (
           <>
-            {nickname && <p className="text-[13px] text-[#1B4A38] font-medium">{nickname}</p>}
-            <p className="text-[13px] text-[#2E2A24] mb-4">{userEmail}</p>
-            <button onClick={onLogout} className="text-[13px] px-4 py-2 rounded-full border border-[#E4DFCF] text-[#A24B3A] hover:border-[#A24B3A] transition">{t("settings_logout")}</button>
+            {nickname && <p className="text-[14px] text-[#1B4A38] font-medium">{nickname}</p>}
+            <p className="text-[14px] text-[#2E2A24] mb-4">{userEmail}</p>
+            <button onClick={onLogout} className="text-[14px] px-4 py-2 rounded-full border border-[#E4DFCF] text-[#A24B3A] hover:border-[#A24B3A] transition">{t("settings_logout")}</button>
           </>
         )}
       </section>
 
       <section className="rounded-3xl border border-[#E4DFCF] bg-white/70 p-6 max-w-xl">
-        <h2 className="font-display text-[16px] text-[#1B4A38] mb-3">{t("settings_language")}</h2>
+        <h2 className="font-display text-[17px] text-[#1B4A38] mb-3">{t("settings_language")}</h2>
         <div className="flex flex-wrap gap-2">
           <button onClick={() => setLang("zh")}
-            className={`text-[13px] px-4 py-2 rounded-full border transition ${lang === "zh" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+            className={`text-[14px] px-4 py-2 rounded-full border transition ${lang === "zh" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
             繁體中文
           </button>
           <button onClick={() => setLang("en")}
-            className={`text-[13px] px-4 py-2 rounded-full border transition ${lang === "en" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+            className={`text-[14px] px-4 py-2 rounded-full border transition ${lang === "en" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
             English
           </button>
           <button onClick={() => setLang("ja")}
-            className={`text-[13px] px-4 py-2 rounded-full border transition ${lang === "ja" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+            className={`text-[14px] px-4 py-2 rounded-full border transition ${lang === "ja" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
             日本語
           </button>
         </div>
       </section>
 
       <section className="rounded-3xl border border-[#E4DFCF] bg-white/70 p-6 max-w-xl mt-6">
-        <h2 className="font-display text-[16px] text-[#1B4A38] mb-3">{t("settings_data")}</h2>
+        <h2 className="font-display text-[17px] text-[#1B4A38] mb-3">{t("settings_data")}</h2>
         <div className="flex flex-wrap gap-2 mb-4">
           <button onClick={exportData}
-            className="text-[13px] px-4 py-2 rounded-full border border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D] transition">
+            className="text-[14px] px-4 py-2 rounded-full border border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D] transition">
             {t("settings_export")}
           </button>
-          <label className="text-[13px] px-4 py-2 rounded-full border border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D] transition cursor-pointer">
+          <label className="text-[14px] px-4 py-2 rounded-full border border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D] transition cursor-pointer">
             <input type="file" accept=".json,application/json" onChange={importData} className="hidden" />
             {t("settings_import")}
           </label>
@@ -2722,20 +2717,20 @@ function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, 
 
         {!confirmClear ? (
           <button onClick={() => setConfirmClear(true)}
-            className="btn-danger text-[13px] px-4 py-2 rounded-full border transition hover:bg-[#F7EAE6]">
+            className="btn-danger text-[14px] px-4 py-2 rounded-full border transition hover:bg-[#F7EAE6]">
             {t("settings_clear")}
           </button>
         ) : (
           <div className="rounded-lg bg-[#F7EAE6] border border-[#EBCFC6] p-3">
-            <p className="text-[13px] text-[#BA0F0F] mb-3">{t("settings_clear_confirm")}</p>
+            <p className="text-[14px] text-[#BA0F0F] mb-3">{t("settings_clear_confirm")}</p>
             <div className="flex gap-2">
               <button
                 onClick={() => { setRecords([]); setConfirmClear(false); }}
-                className="btn-danger text-[13px] px-4 py-1.5 rounded-full border transition hover:bg-[#F7EAE6]"
+                className="btn-danger text-[14px] px-4 py-1.5 rounded-full border transition hover:bg-[#F7EAE6]"
               >
                 {t("settings_clear_yes")}
               </button>
-              <button onClick={() => setConfirmClear(false)} className="text-[13px] px-4 py-1.5 rounded-full border border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D] transition">
+              <button onClick={() => setConfirmClear(false)} className="text-[14px] px-4 py-1.5 rounded-full border border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D] transition">
                 {t("add_cancel")}
               </button>
             </div>
@@ -2825,12 +2820,12 @@ function MatchaApp({ lang, setLang, records, setRecords, userEmail, nickname, is
         )}
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur z-10 safe-pb">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur z-10 nav-safe-pb">
         <div className="max-w-3xl mx-auto grid grid-cols-6">
           {TABS.map((tb) => (
             <button key={tb.key} onClick={() => setTab(tb.key)} className="btn-nav flex flex-col items-center gap-0.5 py-2.5">
               <NavIcon name={tb.icon} active={tab === tb.key} />
-              <span className={`text-[10px] ${tab === tb.key ? "text-[#2B7056] font-medium" : "text-[#9C9484]"}`}>{tb.label}</span>
+              <span className={`text-[11px] ${tab === tb.key ? "text-[#2B7056] font-medium" : "text-[#9C9484]"}`}>{tb.label}</span>
             </button>
           ))}
         </div>
@@ -2851,6 +2846,17 @@ export default function App() {
     }
   };
   const saved = loadSaved();
+  if (saved && Array.isArray(saved.records)) {
+    saved.records = saved.records.map((r) => (r && Array.isArray(r.occasions) ? { ...r, occasions: r.occasions.filter((o) => o !== "甜點") } : r));
+  }
+
+  // iOS ignores user-scalable=no, so block pinch gestures explicitly to keep the page at 100%
+  useEffect(() => {
+    const stop = (e) => e.preventDefault();
+    document.addEventListener("gesturestart", stop);
+    document.addEventListener("gesturechange", stop);
+    return () => { document.removeEventListener("gesturestart", stop); document.removeEventListener("gesturechange", stop); };
+  }, []);
 
   const [lang, setLang] = useState(saved && saved.lang && STR[saved.lang] ? saved.lang : "zh");
   const [records, setRecords] = useState(saved && saved.records ? saved.records : seedData);
