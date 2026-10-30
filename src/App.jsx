@@ -1888,9 +1888,10 @@ function HomeTab({ lang, records, userEmail, nickname, isGuest, onAdd, onGoRecor
         ) : (
           <div className="flex flex-col gap-3">
             {records.filter((r) => r.favorite).map((r) => (
-              <div key={r.id} className="flex items-start gap-4 rounded-2xl border border-[#E4DFCF] bg-white/70 p-4">
+              <div key={r.id} className="relative flex items-start gap-4 rounded-2xl border border-[#E4DFCF] bg-white/70 p-4">
+                <span className="absolute top-3 right-4"><FavStar on size={18} /></span>
                 <RecordIcon record={r} size={48} />
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0 flex-1 pr-7">
                   <p className="font-display text-[17px] text-[#1B4A38] truncate">{r.brand}</p>
                   <p className="text-[14px] text-[#8A8371] truncate">{r.cultivar || "—"}{Number(r.initialWeight) > 0 ? ` · ${r.initialWeight} g` : ""}</p>
                   <div className="mt-1.5"><Stars value={r.rating} /></div>
@@ -1996,6 +1997,10 @@ function RecordListCard({ r, lang, t, onClick, compact = false }) {
 
   const rows = Math.max(left.length, right.length);
   const cells = [];
+  if (r.favorite) {
+    cells.push(<div key="fav-l" className="h-5" />);
+    cells.push(<div key="fav-r" className="h-5 flex items-center justify-end"><FavStar on size={18} /></div>);
+  }
   for (let i = 0; i < rows; i++) {
     const l = left[i], rr = right[i];
     cells.push(
@@ -2009,7 +2014,7 @@ function RecordListCard({ r, lang, t, onClick, compact = false }) {
     <article onClick={onClick}
       className="group relative rounded-2xl border border-[#E4DFCF] bg-white/70 p-4 hover:shadow-md hover:border-[#8DC48D] transition cursor-pointer">
       <div className="flex items-start gap-4">
-        <RecordIcon record={r} size={72} />
+        <div style={{ marginTop: r.favorite ? 24 : 0 }}><RecordIcon record={r} size={72} /></div>
         <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 flex-1 min-w-0 items-center">
           {cells}
         </div>
