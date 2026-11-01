@@ -2199,7 +2199,7 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
           ))}
         </div>
 
-        <div className="flex flex-wrap gap-2 items-center">
+        <div className="flex flex-wrap gap-x-1.5 gap-y-2 items-center">
           <span className="text-[14px] text-[#8A8371] mr-1">{t("filter_occasion")}</span>
           {["全部", ...occasionChoices].map((o) => (
             <button key={o} onClick={() => setOccFilter(o)}
