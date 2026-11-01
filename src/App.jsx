@@ -351,12 +351,13 @@ const STR = {
     settings_login_btn: "修改暱稱", settings_nick_label: "暱稱", settings_nick_save: "儲存", settings_logout: "登出",
     settings_language: "語言設置",
     settings_data: "資料管理",
-    settings_export: "匯出全部資料", settings_import: "匯入資料", settings_clear: "清除所有資料",
+    settings_export: "匯出備份", settings_import: "匯入備份", settings_clear: "清除所有資料",
+    settings_backup_busy: "處理中，請稍候…", settings_backup_done: "備份檔已匯出", settings_backup_fail: "匯出失敗，請再試一次", settings_backup_restored: "備份已匯入", settings_backup_badfile: "檔案無法讀取，請確認是 Matcha Log 的備份檔",
     settings_clear_confirm: "確定要清除所有紀錄嗎？此操作無法復原。",
     settings_clear_yes: "確認清除",
     settings_storage_note: "資料只會儲存於本裝置，一旦清除瀏覽器紀錄或於手機主畫面移除web app，資料會一同清除",
     auth_guest: "以訪客身份繼續",
-    delete: "刪除紀錄",
+    delete: "刪除",
     delete_confirm_msg: "刪除後資料無法復原",
     delete_cancel: "取消", delete_yes: "確認刪除",
     label_validUntil: "有效期限",
@@ -434,12 +435,13 @@ const STR = {
     settings_login_btn: "Edit Nickname", settings_nick_label: "Nickname", settings_nick_save: "Save", settings_logout: "Log out",
     settings_language: "Language",
     settings_data: "Data Management",
-    settings_export: "Export All Data", settings_import: "Import Data", settings_clear: "Clear All Data",
+    settings_export: "Export Backup", settings_import: "Import Backup", settings_clear: "Clear All Data",
+    settings_backup_busy: "Working, please wait…", settings_backup_done: "Backup exported", settings_backup_fail: "Export failed, please try again", settings_backup_restored: "Backup imported", settings_backup_badfile: "Could not read this file. Is it a Matcha Log backup?",
     settings_clear_confirm: "Are you sure you want to clear all records? This cannot be undone.",
     settings_clear_yes: "Confirm Clear",
     settings_storage_note: "Data is stored only on this device. If you clear your browser data or remove the web app from your phone's home screen, your data will be erased too.",
     auth_guest: "Continue as Guest",
-    delete: "Delete record",
+    delete: "Delete",
     delete_confirm_msg: "This cannot be undone once deleted",
     delete_cancel: "Cancel", delete_yes: "Confirm Delete",
     label_validUntil: "Valid until",
@@ -517,12 +519,13 @@ const STR = {
     settings_login_btn: "ニックネームを変更", settings_nick_label: "ニックネーム", settings_nick_save: "保存", settings_logout: "ログアウト",
     settings_language: "言語設定",
     settings_data: "データ管理",
-    settings_export: "全データを書き出す", settings_import: "データを読み込む", settings_clear: "すべてのデータを削除",
+    settings_export: "バックアップを書き出す", settings_import: "バックアップを読み込む", settings_clear: "すべてのデータを削除",
+    settings_backup_busy: "処理中です…", settings_backup_done: "バックアップを書き出しました", settings_backup_fail: "書き出しに失敗しました。もう一度お試しください", settings_backup_restored: "バックアップを読み込みました", settings_backup_badfile: "ファイルを読み込めません。Matcha Logのバックアップか確認してください",
     settings_clear_confirm: "本当にすべての記録を削除しますか？この操作は取り消せません。",
     settings_clear_yes: "削除する",
     settings_storage_note: "データはこの端末にのみ保存されます。ブラウザの履歴を消去したり、ホーム画面からWebアプリを削除したりすると、データも一緒に消去されます。",
     auth_guest: "ゲストとして続ける",
-    delete: "記録を削除",
+    delete: "削除",
     delete_confirm_msg: "削除すると元に戻せません",
     delete_cancel: "キャンセル", delete_yes: "削除を確認",
     label_validUntil: "賞味期限",
@@ -918,7 +921,7 @@ function AuthScreen({ onEnter, lang, setLang }) {
                 className="w-full text-center rounded-lg border border-[#E4DFCF] px-3 py-2.5 !text-[17px] outline-none focus:border-[#8DC48D] focus:ring-2 focus:ring-[#BDDBBD] transition" />
             </div>
             <button type="submit" style={{ backgroundColor: "#D5F2DB" }}
-              className="mt-1 self-center rounded-full text-[#1B4A38] font-medium text-[16px] px-5 py-1.5 transition hover:brightness-95">
+              className="mt-1 self-center rounded-full text-[#1B4A38] font-medium text-[16px] px-5 py-2 transition hover:brightness-95">
               {A.enter}
             </button>
           </form>
@@ -1035,9 +1038,9 @@ function LogUsageScreen({ lang, record, onCancel, onSave }) {
         </div>
 
         <header className="flex items-center justify-between px-4 pt-3 pb-3">
-          <button onClick={onCancel} className="text-[14px] px-3 py-1 rounded-full border">{t("add_cancel")}</button>
+          <button onClick={onCancel} className="text-[14px] px-3 py-1.5 rounded-full border">{t("add_cancel")}</button>
           <h1 className="font-display text-[16px] font-700 text-[#1B4A38]">{t("weight_add_title")}</h1>
-          <button onClick={submit} disabled={!canSave} className="text-[14px] px-3 py-1 rounded-full border text-[#2B7056] disabled:opacity-40 disabled:cursor-not-allowed font-medium">
+          <button onClick={submit} disabled={!canSave} className="text-[14px] px-3 py-1.5 rounded-full border text-[#2B7056] disabled:opacity-40 disabled:cursor-not-allowed font-medium">
             {t("action_save")}
           </button>
         </header>
@@ -1094,7 +1097,7 @@ function LogUsageScreen({ lang, record, onCancel, onSave }) {
               <div className="flex flex-wrap justify-end gap-2 py-1">
                 {occasionsForCategory.map((o) => (
                   <button key={o} type="button" onClick={() => togglePurpose(o)}
-                    className={`text-[14px] px-3 py-1 rounded-full border transition ${purposes.includes(o) ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+                    className={`text-[14px] px-3 py-1.5 rounded-full border transition ${purposes.includes(o) ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
                     {OCC_LABEL[o][lang]}
                   </button>
                 ))}
@@ -1114,7 +1117,7 @@ function LogUsageScreen({ lang, record, onCancel, onSave }) {
                 <div className="flex flex-wrap justify-end gap-2 py-1">
                   {TEA_STYLES.map((s) => (
                     <button key={s} type="button" onClick={() => setTeaStyle(teaStyle === s ? "" : s)}
-                      className={`text-[14px] px-3 py-1 rounded-full border transition ${teaStyle === s ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+                      className={`text-[14px] px-3 py-1.5 rounded-full border transition ${teaStyle === s ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
                       {TEA_STYLE_LABEL[s][lang]}
                     </button>
                   ))}
@@ -1256,7 +1259,7 @@ function UsageLogItem({ lang, entry, category, maxAmount, onSave, onDelete }) {
       <div className="flex flex-wrap gap-1.5">
         {occasionsForCategory.map((o) => (
           <button key={o} type="button" onClick={() => togglePurpose(o)}
-            className={`text-[14px] px-2.5 py-[3px] rounded-full border transition ${purposes.includes(o) ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558]"}`}>
+            className={`text-[14px] px-2.5 py-1 rounded-full border transition ${purposes.includes(o) ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558]"}`}>
             {OCC_LABEL[o][lang]}
           </button>
         ))}
@@ -1293,8 +1296,8 @@ function UsageLogItem({ lang, entry, category, maxAmount, onSave, onDelete }) {
       <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder={t("weight_note")}
         className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-[14px] outline-none resize-none" />
       <div className="flex justify-end gap-2">
-        <button onClick={() => setEditing(false)} className="text-[14px] px-2.5 py-[3px] rounded-full">{t("add_cancel")}</button>
-        <button onClick={submit} className="text-[14px] px-2.5 py-[3px] rounded-full bg-[#EAF3E8]">{t("action_save")}</button>
+        <button onClick={() => setEditing(false)} className="text-[14px] px-2.5 py-1 rounded-full">{t("add_cancel")}</button>
+        <button onClick={submit} className="text-[14px] px-2.5 py-1 rounded-full bg-[#EAF3E8]">{t("action_save")}</button>
       </div>
     </div>
   );
@@ -1427,10 +1430,10 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
               </div>
             </div>
             <div className="flex flex-col gap-3 flex-1 min-w-0 max-w-[140px]">
-              <button onClick={() => setShowUsageLog((v) => !v)} className="btn-brown text-[14px] px-2 py-1 rounded-full border w-full whitespace-nowrap">
+              <button onClick={() => setShowUsageLog((v) => !v)} className="btn-brown text-[14px] px-2 py-1.5 rounded-full border w-full whitespace-nowrap">
                 {t("weight_log")}
               </button>
-              <button onClick={() => canAddUsage && setSubScreen("logUsage")} disabled={!canAddUsage} className="text-[14px] px-2 py-1 rounded-full border w-full whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed">
+              <button onClick={() => canAddUsage && setSubScreen("logUsage")} disabled={!canAddUsage} className="text-[14px] px-2 py-1.5 rounded-full border w-full whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed">
                 {t("weight_add")}
               </button>
               {remaining <= 0 && (
@@ -1469,24 +1472,24 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
       <>
       <div className="min-h-screen w-full bg-[#E0E6DA] font-body text-[#2E2A24]">
         {FONT_STYLE}
-        <header className="max-w-2xl mx-auto px-6 pt-[25px] pb-6">
+        <header className="max-w-2xl mx-auto px-6 pt-[25px] pb-5">
           <div className="flex items-start justify-between">
             <div className="flex flex-col items-start gap-3">
-              <button onClick={onCancel} className="btn-plain text-[14px] text-[#6B6558] hover:text-[#2B7056] flex items-center gap-1">
+              <button onClick={onCancel} className="btn-plain text-[16px] text-[#6B6558] hover:text-[#2B7056] flex items-center gap-1">
                 {t("add_back")}
               </button>
               <h1 className="font-display text-2xl md:text-3xl text-[#1B4A38] font-700">{t("records_title")}</h1>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <button onClick={() => setScreenMode("edit")} className="text-[14px] px-3 py-[3px] rounded-full border flex items-center gap-1.5">
-                <EditIcon size={12} /> {t("action_edit")}
+              <button onClick={() => setScreenMode("edit")} className="text-[15px] px-4 py-1 rounded-full border flex items-center gap-1.5">
+                <EditIcon size={14} /> {t("action_edit")}
               </button>
-              <button onClick={() => setConfirmDelete(true)} className="btn-danger text-[14px] px-3 py-[3px] rounded-full border flex items-center gap-1.5">
-                <TrashIcon size={12} /> {t("delete")}
+              <button onClick={() => setConfirmDelete(true)} className="btn-danger text-[15px] px-4 py-1 rounded-full border flex items-center gap-1.5">
+                <TrashIcon size={14} /> {t("delete")}
               </button>
             </div>
           </div>
-          <div className="mt-5 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
+          <div className="mt-4 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
         </header>
 
         <main className="max-w-2xl mx-auto px-6 pb-24">
@@ -1551,10 +1554,10 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
           <div className="bg-white rounded-3xl border border-[#E4DFCF] p-6 max-w-xs w-full" onClick={(e) => e.stopPropagation()}>
             <p className="text-[14px] text-[#2E2A24] mb-5 text-center">{t("delete_confirm_msg")}</p>
             <div className="flex justify-center gap-3">
-              <button onClick={() => { onDelete(liveRecord.id); onCancel(); }} className="btn-danger text-[14px] px-4 py-1 rounded-full border">
+              <button onClick={() => { onDelete(liveRecord.id); onCancel(); }} className="btn-danger text-[14px] px-4 py-1.5 rounded-full border">
                 {t("delete_yes")}
               </button>
-              <button onClick={() => setConfirmDelete(false)} className="text-[14px] px-4 py-1 rounded-full border border-[#E4DFCF] text-[#6B6558]">
+              <button onClick={() => setConfirmDelete(false)} className="text-[14px] px-4 py-1.5 rounded-full border border-[#E4DFCF] text-[#6B6558]">
                 {t("delete_cancel")}
               </button>
             </div>
@@ -1642,31 +1645,31 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
         <>
           <div className="flex justify-center pt-3"><div className="w-10 h-1.5 rounded-full bg-[#D9D2C2]" /></div>
           <header className="flex items-center justify-between px-4 pt-3 pb-3">
-            <button onClick={onCancel} className="text-[14px] px-3 py-1 rounded-full border">{t("add_cancel")}</button>
+            <button onClick={onCancel} className="text-[14px] px-3 py-1.5 rounded-full border">{t("add_cancel")}</button>
             <h1 className="font-display text-[16px] font-700 text-[#1B4A38]">{t("add_title")}</h1>
-            <button onClick={submit} disabled={!formValid} className="text-[14px] px-3 py-1 rounded-full border text-[#2B7056] disabled:opacity-40 disabled:cursor-not-allowed font-medium">
+            <button onClick={submit} disabled={!formValid} className="text-[14px] px-3 py-1.5 rounded-full border text-[#2B7056] disabled:opacity-40 disabled:cursor-not-allowed font-medium">
               {t("action_save")}
             </button>
           </header>
         </>
       ) : (
-      <header className="max-w-2xl mx-auto px-6 pt-[25px] pb-6">
+      <header className="max-w-2xl mx-auto px-6 pt-[25px] pb-5">
         <div className="flex items-start justify-between">
-          <button onClick={onCancel} className="btn-plain text-[14px] text-[#6B6558] hover:text-[#2B7056] flex items-center gap-1 mb-4">
+          <button onClick={onCancel} className="btn-plain text-[16px] text-[#6B6558] hover:text-[#2B7056] flex items-center gap-1 mb-4">
             {t("add_back")}
           </button>
           {initialRecord && (
             <div className="flex flex-col items-end gap-2">
-              <button type="button" aria-current="true" className="text-[14px] px-3 py-1 rounded-full border border-[#8DC48D] bg-[#EAF3E8] text-[#2B7056] flex items-center gap-1.5">
-                <EditIcon size={12} /> {t("action_edit")}
+              <button type="button" aria-current="true" className="text-[15px] px-4 py-1.5 rounded-full border border-[#8DC48D] bg-[#EAF3E8] text-[#2B7056] flex items-center gap-1.5">
+                <EditIcon size={14} /> {t("action_edit")}
               </button>
-              <button type="button" onClick={() => setConfirmDelete(true)} className="btn-danger text-[14px] px-3 py-1 rounded-full border flex items-center gap-1.5">
-                <TrashIcon size={12} /> {t("delete")}
+              <button type="button" onClick={() => setConfirmDelete(true)} className="btn-danger text-[15px] px-4 py-1.5 rounded-full border flex items-center gap-1.5">
+                <TrashIcon size={14} /> {t("delete")}
               </button>
             </div>
           )}
         </div>
-        <div className="mt-5 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
+        <div className="mt-4 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
       </header>
       )}
 
@@ -1684,12 +1687,12 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
             <div className="flex flex-col gap-1 items-center">
               <p className="text-[14px] text-[#B0A990] flex items-center gap-1.5"><RowIcon name="camera" size={18} color="#9C9484" />{t("add_photo_hint")}</p>
               <div className="flex gap-3 items-center mt-1">
-                <label className="text-[14px] px-2.5 py-[3px] rounded-full bg-[#EAF3E8] text-[#2B7056] border-[1.5px] border-[#BDDBBD] cursor-pointer hover:bg-[#D5F2DB] transition">
+                <label className="text-[14px] px-2.5 py-1 rounded-full bg-[#EAF3E8] text-[#2B7056] border-[1.5px] border-[#BDDBBD] cursor-pointer hover:bg-[#D5F2DB] transition">
                   <input type="file" accept="image/jpeg,image/png,image/heic,image/heif" onChange={handlePhoto} className="hidden" />
                   {form.photo ? t("photo_change") : t("photo_new")}
                 </label>
                 {form.photo && (
-                  <button onClick={() => update("photo", null)} className="text-[14px] px-2.5 py-[3px] rounded-full">
+                  <button onClick={() => update("photo", null)} className="text-[14px] px-2.5 py-1 rounded-full">
                     {t("add_photo_remove")}
                   </button>
                 )}
@@ -1799,7 +1802,7 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
                   <div className="flex flex-wrap gap-2">
                     {PRICE_SOURCES.map((s) => (
                       <button key={s} type="button" onClick={() => update("priceSource", form.priceSource === s ? "" : s)}
-                        className={`text-[14px] px-2.5 py-[3px] rounded-full border transition ${form.priceSource === s ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+                        className={`text-[14px] px-2.5 py-1 rounded-full border transition ${form.priceSource === s ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
                         {PRICE_SOURCE_LABEL[s][lang]}
                       </button>
                     ))}
@@ -1813,7 +1816,7 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
               <div className="flex gap-2">
                 {["未開封", "已開封", "已用完"].map((s) => (
                   <button key={s} type="button" onClick={() => update("status", s)}
-                    className={`text-[14px] px-3 py-1 rounded-full border transition ${form.status === s ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+                    className={`text-[14px] px-3 py-1.5 rounded-full border transition ${form.status === s ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
                     {s === "未開封" ? t("status_unopened") : s === "已開封" ? t("status_inUse") : t("status_used")}
                   </button>
                 ))}
@@ -1866,7 +1869,7 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
               <div className="flex flex-wrap gap-2">
                 {occasionsForCategory.map((o) => (
                   <button key={o} type="button" onClick={() => toggleOccasion(o)}
-                    className={`text-[14px] px-3 py-1 rounded-full border transition ${form.occasions.includes(o) ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+                    className={`text-[14px] px-3 py-1.5 rounded-full border transition ${form.occasions.includes(o) ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
                     {OCC_LABEL[o][lang]}
                   </button>
                 ))}
@@ -1922,9 +1925,9 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
           {weightSection}
 
           {!isSheet && <div className="flex justify-end gap-2 mt-6">
-            <button onClick={cancelEdit} className="text-[14px] px-3 py-1 rounded-full text-[#6B6558] hover:bg-[#F1EEE3] transition">{t("add_cancel")}</button>
+            <button onClick={cancelEdit} className="text-[14px] px-3 py-1.5 rounded-full text-[#6B6558] hover:bg-[#F1EEE3] transition">{t("add_cancel")}</button>
             <button onClick={submit} disabled={!formValid}
-              className="text-[14px] px-4 py-1 rounded-full bg-[#2B7056] text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#1B4A38] transition">
+              className="text-[14px] px-4 py-1.5 rounded-full bg-[#2B7056] text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#1B4A38] transition">
               {t("add_save")}
             </button>
           </div>}
@@ -1938,8 +1941,8 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
         <div className="bg-white rounded-3xl border border-[#E4DFCF] p-6 max-w-xs w-full" onClick={(e) => e.stopPropagation()}>
           <p className="text-[14px] text-[#2E2A24] mb-5 text-center">{t("delete_confirm_msg")}</p>
           <div className="flex justify-center gap-3">
-            <button onClick={() => { onDelete(initialRecord.id); onCancel(); }} className="btn-danger text-[14px] px-4 py-1 rounded-full border">{t("delete_yes")}</button>
-            <button onClick={() => setConfirmDelete(false)} className="text-[14px] px-4 py-1 rounded-full border border-[#E4DFCF] text-[#6B6558]">{t("delete_cancel")}</button>
+            <button onClick={() => { onDelete(initialRecord.id); onCancel(); }} className="btn-danger text-[14px] px-4 py-1.5 rounded-full border">{t("delete_yes")}</button>
+            <button onClick={() => setConfirmDelete(false)} className="text-[14px] px-4 py-1.5 rounded-full border border-[#E4DFCF] text-[#6B6558]">{t("delete_cancel")}</button>
           </div>
         </div>
       </div>
@@ -2005,16 +2008,16 @@ function HomeTab({ lang, records, userEmail, nickname, isGuest, onAdd, onGoRecor
     .sort((a, b) => (b.r.favoriteAt || 0) - (a.r.favoriteAt || 0) || a.i - b.i).map(({ r }) => r);
   return (
     <div>
-      <header className="pt-[25px] pb-6">
+      <header className="pt-[25px] pb-5">
         <p className="text-[16px] text-[#8A8371]">{t("home_welcome")}</p>
         <h1 className="font-display text-2xl md:text-3xl text-[#1B4A38] font-700 mt-1">
           {nickname || (isGuest ? t("home_guest") : userEmail)}
         </h1>
         <p className="mt-2 text-[14px] text-[#6B6558]">{t("tagline")}</p>
-        <button onClick={onAdd} className="mt-4 rounded-full bg-[#2B7056] hover:bg-[#1B4A38] text-white text-[14px] px-3 py-1.5 transition">
+        <button onClick={onAdd} className="mt-4 rounded-full bg-[#2B7056] hover:bg-[#1B4A38] text-white text-[14px] px-3 py-2 transition">
           {t("home_addBtn")}
         </button>
-        <div className="mt-6 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
+        <div className="mt-5 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
       </header>
 
       <div className="mb-8">
@@ -2211,17 +2214,17 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
 
   return (
     <div>
-      <header className="pt-[25px] pb-6">
+      <header className="pt-[25px] pb-5">
         <div className="flex items-center justify-between gap-3">
           <h1 className="font-display text-2xl md:text-3xl text-[#1B4A38] font-700">{t("records_title")}</h1>
-          <button onClick={onAdd} className="rounded-full bg-[#2B7056] hover:bg-[#1B4A38] text-white text-[14px] px-3 py-1 transition shrink-0">
-            {t("home_addBtn")}
+          <button onClick={onAdd} aria-label={t("home_addBtn")} className="w-9 h-9 rounded-lg bg-[#2B7056] hover:bg-[#1B4A38] text-white text-[22px] leading-none flex items-center justify-center transition shrink-0">
+            +
           </button>
         </div>
-        <div className="mt-5 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
+        <div className="mt-4 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
       </header>
 
-      <section className="grid grid-cols-2 gap-3 mb-6">
+      <section className="grid grid-cols-2 gap-3 mb-5">
         <div className="rounded-2xl border border-[#E4DFCF] bg-white/60 px-4 py-3 flex flex-col gap-0.5">
           <span className="text-[17px] tracking-wider text-[#8A8371]">{t("records_totalUsed")}</span>
           <span className="font-display text-[17px] text-[#2B7056]">{totalUsedGrams}g</span>
@@ -2239,7 +2242,7 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
         <div className="flex flex-wrap gap-2 items-center">
           {["全部", "使用中", "未開封", "已用完"].map((s) => (
             <button key={s} onClick={() => setStatusFilter(s)}
-              className={`text-[14px] px-2.5 py-[3px] rounded-full border transition ${statusFilter === s ? "btn-brown" : ""}`}>
+              className={`text-[14px] px-2.5 py-1 rounded-full border transition ${statusFilter === s ? "btn-brown" : ""}`}>
               {s === "全部" ? t("status_all") : s === "使用中" ? t("status_inUse") : s === "未開封" ? t("status_unopened") : t("status_used")}
             </button>
           ))}
@@ -2249,7 +2252,7 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
           <span className="text-[14px] text-[#8A8371] mr-1">{t("filter_category")}</span>
           {["全部", "抹茶", "焙茶", "玄米茶", "其他"].map((c) => (
             <button key={c} onClick={() => { setCategoryFilter(c); setOccFilter("全部"); }}
-              className={`text-[14px] px-2.5 py-[3px] rounded-full border transition ${categoryFilter === c ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+              className={`text-[14px] px-2.5 py-1 rounded-full border transition ${categoryFilter === c ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
               {c === "全部" ? t("filter_all") : (CATEGORY_LABEL[c] ? CATEGORY_LABEL[c][lang] : c)}
             </button>
           ))}
@@ -2259,7 +2262,7 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
           <span className="text-[14px] text-[#8A8371] mr-1">{t("filter_occasion")}</span>
           {["全部", ...occasionChoices].map((o) => (
             <button key={o} onClick={() => setOccFilter(o)}
-              className={`text-[14px] px-2.5 py-[3px] rounded-full border transition ${occFilter === o ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+              className={`text-[14px] px-2.5 py-1 rounded-full border transition ${occFilter === o ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
               {o === "全部" ? t("filter_all") : OCC_LABEL[o][lang]}
             </button>
           ))}
@@ -2268,11 +2271,11 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
         <div className="flex flex-wrap gap-2 items-center">
           <span className="text-[14px] text-[#8A8371] mr-1">{t("filter_price")}</span>
           <button onClick={() => { setPriceSort(priceSort === "asc" ? null : "asc"); setUsageSort(null); }}
-            className={`text-[14px] px-2.5 py-[3px] rounded-full border transition ${priceSort === "asc" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+            className={`text-[14px] px-2.5 py-1 rounded-full border transition ${priceSort === "asc" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
             {t("price_asc")}
           </button>
           <button onClick={() => { setPriceSort(priceSort === "desc" ? null : "desc"); setUsageSort(null); }}
-            className={`text-[14px] px-2.5 py-[3px] rounded-full border transition ${priceSort === "desc" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+            className={`text-[14px] px-2.5 py-1 rounded-full border transition ${priceSort === "desc" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
             {t("price_desc")}
           </button>
         </div>
@@ -2281,11 +2284,11 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
           <div className="flex flex-wrap gap-2 items-center">
             <span className="text-[14px] text-[#8A8371] mr-1">{t("filter_usageDate")}</span>
             <button onClick={() => { setUsageSort(usageSort === "earliest" ? null : "earliest"); setPriceSort(null); }}
-              className={`text-[14px] px-2.5 py-[3px] rounded-full border transition ${usageSort === "earliest" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+              className={`text-[14px] px-2.5 py-1 rounded-full border transition ${usageSort === "earliest" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
               {t("usage_earliest")}
             </button>
             <button onClick={() => { setUsageSort(usageSort === "latest" ? null : "latest"); setPriceSort(null); }}
-              className={`text-[14px] px-2.5 py-[3px] rounded-full border transition ${usageSort === "latest" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+              className={`text-[14px] px-2.5 py-1 rounded-full border transition ${usageSort === "latest" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
               {t("usage_latest")}
             </button>
           </div>
@@ -2353,9 +2356,9 @@ function ExpiryTab({ lang, records, onUpdate }) {
 
   return (
     <div>
-      <header className="pt-[25px] pb-6">
+      <header className="pt-[25px] pb-5">
         <h1 className="font-display text-2xl md:text-3xl text-[#1B4A38] font-700">{t("expiry_title")}</h1>
-        <div className="mt-5 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
+        <div className="mt-4 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
       </header>
 
       {rows.length === 0 ? (
@@ -2387,7 +2390,7 @@ function ExpiryTab({ lang, records, onUpdate }) {
                     </div>
                   </div>
                   <button onClick={() => toggleStatus(r)}
-                    className="text-[14px] px-2.5 py-[3px] rounded-full border border-[#8DC48D] text-[#2B7056] hover:bg-[#EAF3E8] transition shrink-0">
+                    className="text-[14px] px-2.5 py-1 rounded-full border border-[#8DC48D] text-[#2B7056] hover:bg-[#EAF3E8] transition shrink-0">
                     {r.openedDate ? t("expiry_markUnopened") : t("expiry_markOpened")}
                   </button>
                 </div>
@@ -2767,22 +2770,22 @@ function TeaVisitTab({ lang, visits, setVisits }) {
     const ph = normPhotos(viewing);
     return (
       <div className="pt-[25px] pb-8 max-w-2xl mx-auto">
-        <header className="mb-6">
+        <header className="mb-5">
           <div className="flex items-start justify-between">
             <div className="flex flex-col items-start gap-3">
-              <button onClick={() => setViewingId(null)} className="btn-plain text-[14px] text-[#6B6558] hover:text-[#2B7056] flex items-center gap-1">{t("add_back")}</button>
+              <button onClick={() => setViewingId(null)} className="btn-plain text-[16px] text-[#6B6558] hover:text-[#2B7056] flex items-center gap-1">{t("add_back")}</button>
               <h1 className="font-display text-2xl md:text-3xl text-[#1B4A38] font-700">{t("visit_title")}</h1>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <button onClick={() => startEdit(viewing)} className="text-[14px] px-3 py-[3px] rounded-full border flex items-center gap-1.5">
-                <EditIcon size={12} /> {t("action_edit")}
+              <button onClick={() => startEdit(viewing)} className="text-[15px] px-4 py-1 rounded-full border flex items-center gap-1.5">
+                <EditIcon size={14} /> {t("action_edit")}
               </button>
-              <button onClick={() => setConfirmDelete(true)} className="btn-danger text-[14px] px-3 py-[3px] rounded-full border flex items-center gap-1.5">
-                <TrashIcon size={12} /> {t("delete")}
+              <button onClick={() => setConfirmDelete(true)} className="btn-danger text-[15px] px-4 py-1 rounded-full border flex items-center gap-1.5">
+                <TrashIcon size={14} /> {t("delete")}
               </button>
             </div>
           </div>
-          <div className="mt-5 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
+          <div className="mt-4 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
         </header>
         <section className="rounded-3xl border border-[#E4DFCF] bg-white/70 p-6">
           <div className="flex flex-col divide-y divide-[#E4DFCF]">
@@ -2810,8 +2813,8 @@ function TeaVisitTab({ lang, visits, setVisits }) {
             <div className="bg-white rounded-3xl border border-[#E4DFCF] p-6 max-w-xs w-full" onClick={(e) => e.stopPropagation()}>
               <p className="text-[14px] text-[#2E2A24] mb-5 text-center">{t("delete_confirm_msg")}</p>
               <div className="flex justify-center gap-3">
-                <button onClick={doDelete} className="btn-danger text-[14px] px-4 py-1 rounded-full border">{t("delete_yes")}</button>
-                <button onClick={() => setConfirmDelete(false)} className="text-[14px] px-4 py-1 rounded-full border border-[#E4DFCF] text-[#6B6558]">{t("delete_cancel")}</button>
+                <button onClick={doDelete} className="btn-danger text-[14px] px-4 py-1.5 rounded-full border">{t("delete_yes")}</button>
+                <button onClick={() => setConfirmDelete(false)} className="text-[14px] px-4 py-1.5 rounded-full border border-[#E4DFCF] text-[#6B6558]">{t("delete_cancel")}</button>
               </div>
             </div>
           </div>
@@ -2828,8 +2831,8 @@ function TeaVisitTab({ lang, visits, setVisits }) {
           <p className="mt-2 text-[14px] text-[#6B6558]">{t("visit_tagline")}</p>
         </div>
         {(!editing || editing._new) && (
-          <button onClick={startAdd} className="text-[14px] px-3 py-1 rounded-full bg-[#EAF3E8] text-[#2B7056] border-[1.5px] border-[#BDDBBD] hover:bg-[#D5F2DB] transition">
-            {t("visit_addBtn")}
+          <button onClick={startAdd} aria-label={t("visit_add")} className="w-9 h-9 rounded-lg bg-[#2B7056] hover:bg-[#1B4A38] text-white text-[22px] leading-none flex items-center justify-center transition shrink-0">
+            +
           </button>
         )}
       </header>
@@ -2893,7 +2896,7 @@ function TeaVisitTab({ lang, visits, setVisits }) {
                   <div className="flex flex-wrap gap-2">
                     {PRICE_SOURCES.map((src) => (
                       <button key={src} type="button" onClick={() => upd("priceSource", editing.priceSource === src ? "" : src)}
-                        className={`text-[14px] px-2.5 py-[3px] rounded-full border transition ${editing.priceSource === src ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+                        className={`text-[14px] px-2.5 py-1 rounded-full border transition ${editing.priceSource === src ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
                         {PRICE_SOURCE_LABEL[src][lang]}
                       </button>
                     ))}
@@ -2939,7 +2942,7 @@ function TeaVisitTab({ lang, visits, setVisits }) {
                 </div>
               )}
               <div className="flex gap-3 items-center">
-                <label className="text-[14px] px-2.5 py-[3px] rounded-full bg-[#EAF3E8] text-[#2B7056] border-[1.5px] border-[#BDDBBD] cursor-pointer hover:bg-[#D5F2DB] transition">
+                <label className="text-[14px] px-2.5 py-1 rounded-full bg-[#EAF3E8] text-[#2B7056] border-[1.5px] border-[#BDDBBD] cursor-pointer hover:bg-[#D5F2DB] transition">
                   <input type="file" multiple accept="image/jpeg,image/png,image/heic,image/heif,video/*" onChange={handlePhoto} className="hidden" />
                   {t("visit_photo_add")}
                 </label>
@@ -2947,8 +2950,8 @@ function TeaVisitTab({ lang, visits, setVisits }) {
             </div>
           </div>
           <div className="flex justify-end gap-2 mt-6">
-            <button onClick={cancelEdit} className="text-[14px] px-3 py-1 rounded-full text-[#6B6558] hover:bg-[#F1EEE3] transition">{t("add_cancel")}</button>
-            <button onClick={save} className="btn-brown text-[14px] px-4 py-1 rounded-full transition">{t("visit_save")}</button>
+            <button onClick={cancelEdit} className="text-[14px] px-3 py-1.5 rounded-full text-[#6B6558] hover:bg-[#F1EEE3] transition">{t("add_cancel")}</button>
+            <button onClick={save} className="btn-brown text-[14px] px-4 py-1.5 rounded-full transition">{t("visit_save")}</button>
           </div>
         </section>
       )}
@@ -2957,9 +2960,9 @@ function TeaVisitTab({ lang, visits, setVisits }) {
           <div className="bg-white rounded-t-3xl w-full max-w-2xl h-[90vh] h-[90dvh] overflow-y-auto overflow-x-hidden touch-pan-y font-body text-[#2E2A24] safe-pb" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-center pt-3"><div className="w-10 h-1.5 rounded-full bg-[#D9D2C2]" /></div>
             <header className="flex items-center justify-between px-4 pt-3 pb-3">
-              <button onClick={cancelEdit} className="text-[14px] px-3 py-1 rounded-full border">{t("add_cancel")}</button>
+              <button onClick={cancelEdit} className="text-[14px] px-3 py-1.5 rounded-full border">{t("add_cancel")}</button>
               <h1 className="font-display text-[16px] font-700 text-[#1B4A38]">{t("visit_add")}</h1>
-              <button onClick={save} className="text-[14px] px-3 py-1 rounded-full border text-[#2B7056] font-medium">{t("action_save")}</button>
+              <button onClick={save} className="text-[14px] px-3 py-1.5 rounded-full border text-[#2B7056] font-medium">{t("action_save")}</button>
             </header>
             <div className="px-6 pb-8">
           <div className="grid grid-cols-1 gap-4">
@@ -3018,7 +3021,7 @@ function TeaVisitTab({ lang, visits, setVisits }) {
                     <div className="flex flex-wrap gap-2">
                       {PRICE_SOURCES.map((src) => (
                         <button key={src} type="button" onClick={() => upd("priceSource", editing.priceSource === src ? "" : src)}
-                          className={`text-[14px] px-2.5 py-[3px] rounded-full border transition ${editing.priceSource === src ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+                          className={`text-[14px] px-2.5 py-1 rounded-full border transition ${editing.priceSource === src ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
                           {PRICE_SOURCE_LABEL[src][lang]}
                         </button>
                       ))}
@@ -3064,7 +3067,7 @@ function TeaVisitTab({ lang, visits, setVisits }) {
                   </div>
                 )}
                 <div className="flex gap-3 items-center">
-                  <label className="text-[14px] px-2.5 py-[3px] rounded-full bg-[#EAF3E8] text-[#2B7056] border-[1.5px] border-[#BDDBBD] cursor-pointer hover:bg-[#D5F2DB] transition">
+                  <label className="text-[14px] px-2.5 py-1 rounded-full bg-[#EAF3E8] text-[#2B7056] border-[1.5px] border-[#BDDBBD] cursor-pointer hover:bg-[#D5F2DB] transition">
                     <input type="file" multiple accept="image/jpeg,image/png,image/heic,image/heif,video/*" onChange={handlePhoto} className="hidden" />
                     {t("visit_photo_add")}
                   </label>
@@ -3080,7 +3083,7 @@ function TeaVisitTab({ lang, visits, setVisits }) {
         <div className="flex flex-wrap gap-2 items-center mb-4">
           {[["desc", t("visit_sortNew")], ["asc", t("visit_sortOld")]].map(([k, label]) => (
             <button key={k} onClick={() => setVisitOrder(k)}
-              className={`text-[14px] px-2.5 py-[3px] rounded-full border transition ${visitOrder === k ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+              className={`text-[14px] px-3 py-1.5 rounded-full border transition ${visitOrder === k ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
               {label}
             </button>
           ))}
@@ -3162,20 +3165,20 @@ function StatsTab({ lang, records }) {
 
   return (
     <div>
-      <header className="pt-[25px] pb-6">
+      <header className="pt-[25px] pb-5">
         <h1 className="font-display text-2xl md:text-3xl text-[#1B4A38] font-700">{t("stats_title")}</h1>
-        <div className="mt-5 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
+        <div className="mt-4 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
       </header>
 
       <div className="flex flex-wrap gap-2 items-center mb-6">
         <span className="text-[14px] text-[#8A8371] mr-1">{t("stats_filterYear")}</span>
         <button onClick={() => setPeriodYear("全部")}
-          className={`text-[14px] px-2.5 py-[3px] rounded-full border transition ${periodYear === "全部" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+          className={`text-[14px] px-2.5 py-1 rounded-full border transition ${periodYear === "全部" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
           {t("filter_all")}
         </button>
         {years.map((y) => (
           <button key={y} onClick={() => setPeriodYear(y)}
-            className={`text-[14px] px-2.5 py-[3px] rounded-full border transition ${periodYear === y ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+            className={`text-[14px] px-2.5 py-1 rounded-full border transition ${periodYear === y ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
             {y}
           </button>
         ))}
@@ -3342,9 +3345,9 @@ function FeedbackTab({ lang }) {
 
   return (
     <div>
-      <header className="pt-[25px] pb-6">
+      <header className="pt-[25px] pb-5">
         <h1 className="font-display text-2xl md:text-3xl text-[#1B4A38] font-700">{t("feedback_title")}</h1>
-        <div className="mt-5 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
+        <div className="mt-4 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
       </header>
 
       <section className="rounded-3xl border border-[#E4DFCF] bg-white/70 p-6 max-w-xl">
@@ -3359,7 +3362,7 @@ function FeedbackTab({ lang }) {
           <div className="flex gap-2">
             {CATS.map((c) => (
               <button key={c.key} onClick={() => setCat(c.key)}
-                className={`inline-flex items-center gap-1 text-[14px] px-2.5 py-[3px] rounded-full border transition ${cat === c.key ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+                className={`inline-flex items-center gap-1 text-[14px] px-2.5 py-1.5 rounded-full border transition ${cat === c.key ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
                 <RowIcon name={c.icon} size={14} color="currentColor" />{c.label}
               </button>
             ))}
@@ -3367,7 +3370,7 @@ function FeedbackTab({ lang }) {
         </div>
         <div className="flex flex-col gap-1 mb-4">
           <label className="text-[14px] text-[#8A8371]">{t("feedback_message")}</label>
-          <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={4} placeholder={t("feedback_message_ph")}
+          <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={6} placeholder={t("feedback_message_ph")}
             className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D] resize-none" />
         </div>
         <div className="flex flex-col gap-1 mb-5">
@@ -3376,7 +3379,7 @@ function FeedbackTab({ lang }) {
             className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D]" />
         </div>
         <button onClick={submit} disabled={sending || !message.trim()}
-          className="rounded-full bg-[#2B7056] text-white text-[14px] px-4 py-1.5 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#1B4A38] transition">
+          className="rounded-full bg-[#2B7056] text-white text-[14px] px-4 py-2 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#1B4A38] transition">
           {sending ? t("feedback_sending") : t("feedback_submit")}
         </button>
       </section>
@@ -3385,51 +3388,94 @@ function FeedbackTab({ lang }) {
 }
 
 /* ================= SETTINGS TAB ================= */
-function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, onLogout, onSetNickname, records, setRecords }) {
+function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, onLogout, onSetNickname, records, setRecords, visits, setVisits }) {
   const t = (k) => STR[lang][k] ?? k;
   const [editingNick, setEditingNick] = useState(false);
   const [nickDraft, setNickDraft] = useState("");
   const [confirmClear, setConfirmClear] = useState(false);
 
-  const exportData = () => {
-    const blob = new Blob([JSON.stringify(records, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "matcha-log-export.json";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  const [backupMsg, setBackupMsg] = useState("");
+  const [backupBusy, setBackupBusy] = useState(false);
+  const blobToDataUrl = (b) => new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => res(null); r.readAsDataURL(b); });
+
+  // full backup: records + tea visits (photos are inside the records) + videos (IndexedDB) + nickname/language
+  const exportData = async () => {
+    setBackupBusy(true); setBackupMsg("");
+    try {
+      const videoIds = [...new Set((visits || []).flatMap((v) => (v.photos || []).filter((p) => p && typeof p === "object" && p.video && p.id !== SAMPLE_VIDEO_ID).map((p) => p.id)))];
+      const videos = {};
+      for (const id of videoIds) {
+        const blob = await mediaGet(id);
+        if (blob) videos[id] = await blobToDataUrl(blob);
+      }
+      const payload = { app: "matcha-log", version: 2, exportedAt: new Date().toISOString(), lang, nickname, records, visits, videos };
+      const d = new Date();
+      const name = `matcha-log-backup-${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}.json`;
+      const json = JSON.stringify(payload);
+      const file = new File([json], name, { type: "application/json" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try { await navigator.share({ files: [file] }); setBackupMsg(t("settings_backup_done")); }
+        catch (e) { if (!e || e.name !== "AbortError") throw e; }
+      } else {
+        const url = URL.createObjectURL(file);
+        const a = document.createElement("a");
+        a.href = url; a.download = name;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+        setBackupMsg(t("settings_backup_done"));
+      }
+    } catch (e) {
+      setBackupMsg(t("settings_backup_fail"));
+    }
+    setBackupBusy(false);
   };
 
   const importData = (e) => {
     const file = e.target.files && e.target.files[0];
+    e.target.value = "";
     if (!file) return;
+    setBackupBusy(true); setBackupMsg("");
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       try {
         const parsed = JSON.parse(reader.result);
         if (Array.isArray(parsed)) {
+          // legacy file: records only
           setRecords((rs) => {
             const existingIds = new Set(rs.map((r) => r.id));
             const incoming = parsed.map((r, i) => (existingIds.has(r.id) ? { ...r, id: Date.now() + i } : r));
             return [...incoming, ...rs];
           });
+        } else if (parsed && parsed.app === "matcha-log" && Array.isArray(parsed.records)) {
+          // restore: items whose id already exists are kept as they are, the rest are added
+          setRecords((rs) => { const ids = new Set(rs.map((r) => r.id)); return [...rs, ...parsed.records.filter((r) => r && !ids.has(r.id))]; });
+          if (Array.isArray(parsed.visits) && setVisits) {
+            setVisits((vs) => { const ids = new Set(vs.map((v) => v.id)); return [...vs, ...parsed.visits.filter((v) => v && !ids.has(v.id))]; });
+          }
+          if (parsed.videos && typeof parsed.videos === "object") {
+            for (const id of Object.keys(parsed.videos)) {
+              try { const blob = await (await fetch(parsed.videos[id])).blob(); await mediaPut(id, blob); } catch (err) { /* skip this video */ }
+            }
+          }
+          if (!nickname && parsed.nickname && onSetNickname) onSetNickname(parsed.nickname);
+        } else {
+          throw new Error("bad file");
         }
+        setBackupMsg(t("settings_backup_restored"));
       } catch (err) {
-        /* ignore invalid file */
+        setBackupMsg(t("settings_backup_badfile"));
       }
+      setBackupBusy(false);
     };
+    reader.onerror = () => { setBackupMsg(t("settings_backup_badfile")); setBackupBusy(false); };
     reader.readAsText(file);
-    e.target.value = "";
   };
 
   return (
     <div>
-      <header className="pt-[25px] pb-6">
+      <header className="pt-[25px] pb-5">
         <h1 className="font-display text-2xl md:text-3xl text-[#1B4A38] font-700">{t("settings_title")}</h1>
-        <div className="mt-5 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
+        <div className="mt-4 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
       </header>
 
       <section className="rounded-3xl border border-[#E4DFCF] bg-white/70 p-6 max-w-xl mb-6">
@@ -3443,14 +3489,14 @@ function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, 
                 <input value={nickDraft} onChange={(e) => setNickDraft(e.target.value)} placeholder="例：抹茶拿鐵愛好者" autoFocus
                   className="rounded-lg border border-[#E4DFCF] px-3 py-2.5 text-[14px] outline-none focus:border-[#8DC48D] focus:ring-2 focus:ring-[#BDDBBD] transition" />
                 <div className="flex gap-2">
-                  <button onClick={() => { onSetNickname(nickDraft.trim() || "訪客"); setEditingNick(false); }} className="btn-brown text-[14px] px-4 py-1 rounded-full border">{t("settings_nick_save")}</button>
-                  <button onClick={() => setEditingNick(false)} className="text-[14px] px-4 py-1 rounded-full border">{t("add_cancel")}</button>
+                  <button onClick={() => { onSetNickname(nickDraft.trim() || "訪客"); setEditingNick(false); }} className="btn-brown text-[14px] px-4 py-1.5 rounded-full border">{t("settings_nick_save")}</button>
+                  <button onClick={() => setEditingNick(false)} className="text-[14px] px-4 py-1.5 rounded-full border">{t("add_cancel")}</button>
                 </div>
               </div>
             ) : (
               <>
                 <p className="text-[17px] text-[#1B4A38] font-medium mb-4">{nickname || "訪客"}</p>
-                <button onClick={() => { setNickDraft(nickname || ""); setEditingNick(true); }} className="text-[14px] px-4 py-1.5 rounded-full border">
+                <button onClick={() => { setNickDraft(nickname || ""); setEditingNick(true); }} className="text-[14px] px-4 py-2 rounded-full border">
                   {t("settings_login_btn")}
                 </button>
               </>
@@ -3460,7 +3506,7 @@ function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, 
           <>
             {nickname && <p className="text-[14px] text-[#1B4A38] font-medium">{nickname}</p>}
             <p className="text-[14px] text-[#2E2A24] mb-4">{userEmail}</p>
-            <button onClick={onLogout} className="text-[14px] px-3 py-1 rounded-full border border-[#E4DFCF] text-[#A24B3A] hover:border-[#A24B3A] transition">{t("settings_logout")}</button>
+            <button onClick={onLogout} className="text-[14px] px-3 py-1.5 rounded-full border border-[#E4DFCF] text-[#A24B3A] hover:border-[#A24B3A] transition">{t("settings_logout")}</button>
           </>
         )}
       </section>
@@ -3469,15 +3515,15 @@ function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, 
         <h2 className="font-display text-[17px] text-[#1B4A38] mb-3">{t("settings_language")}</h2>
         <div className="flex flex-wrap gap-2">
           <button onClick={() => setLang("zh")}
-            className={`text-[14px] px-3 py-1 rounded-full border transition ${lang === "zh" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+            className={`text-[14px] px-3 py-1.5 rounded-full border transition ${lang === "zh" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
             繁體中文
           </button>
           <button onClick={() => setLang("en")}
-            className={`text-[14px] px-3 py-1 rounded-full border transition ${lang === "en" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+            className={`text-[14px] px-3 py-1.5 rounded-full border transition ${lang === "en" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
             English
           </button>
           <button onClick={() => setLang("ja")}
-            className={`text-[14px] px-3 py-1 rounded-full border transition ${lang === "ja" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
+            className={`text-[14px] px-3 py-1.5 rounded-full border transition ${lang === "ja" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
             日本語
           </button>
         </div>
@@ -3486,19 +3532,20 @@ function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, 
       <section className="rounded-3xl border border-[#E4DFCF] bg-white/70 p-6 max-w-xl mt-6">
         <h2 className="font-display text-[17px] text-[#1B4A38] mb-3">{t("settings_data")}</h2>
         <div className="flex flex-wrap gap-2 mb-4">
-          <button onClick={exportData}
-            className="text-[14px] px-3 py-1 rounded-full border border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D] transition">
+          <button onClick={exportData} disabled={backupBusy}
+            className="text-[14px] px-3 py-1.5 rounded-full border border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D] transition disabled:opacity-40">
             {t("settings_export")}
           </button>
-          <label className="text-[14px] px-3 py-1 rounded-full border border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D] transition cursor-pointer">
+          <label className="text-[14px] px-3 py-1.5 rounded-full border border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D] transition cursor-pointer">
             <input type="file" accept=".json,application/json" onChange={importData} className="hidden" />
             {t("settings_import")}
           </label>
         </div>
+        {(backupBusy || backupMsg) && <p className="text-[14px] text-[#6B6558] mb-4">{backupBusy ? t("settings_backup_busy") : backupMsg}</p>}
 
         {!confirmClear ? (
           <button onClick={() => setConfirmClear(true)}
-            className="btn-danger text-[14px] px-3 py-[3px] rounded-full border transition hover:bg-[#F7EAE6]">
+            className="btn-danger text-[14px] px-3 py-1.5 rounded-full border transition hover:bg-[#F7EAE6]">
             {t("settings_clear")}
           </button>
         ) : (
@@ -3511,7 +3558,7 @@ function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, 
               >
                 {t("settings_clear_yes")}
               </button>
-              <button onClick={() => setConfirmClear(false)} className="text-[14px] px-3 py-[3px] rounded-full border border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D] transition">
+              <button onClick={() => setConfirmClear(false)} className="text-[14px] px-3 py-1 rounded-full border border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D] transition">
                 {t("add_cancel")}
               </button>
             </div>
@@ -3617,7 +3664,7 @@ function MatchaApp({ lang, setLang, records, setRecords, visits, setVisits, user
         {tab === "visit" && <TeaVisitTab lang={lang} visits={visits} setVisits={setVisits} />}
         {tab === "feedback" && <FeedbackTab lang={lang} />}
         {tab === "settings" && (
-          <SettingsTab lang={lang} setLang={setLang} userEmail={userEmail} nickname={nickname} isGuest={isGuest} onGoToAuth={onGoToAuth} onLogout={onLogout} onSetNickname={onSetNickname} records={records} setRecords={setRecords} />
+          <SettingsTab lang={lang} setLang={setLang} userEmail={userEmail} nickname={nickname} isGuest={isGuest} onGoToAuth={onGoToAuth} onLogout={onLogout} onSetNickname={onSetNickname} records={records} setRecords={setRecords} visits={visits} setVisits={setVisits} />
         )}
       </main>
 
