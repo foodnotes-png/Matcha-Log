@@ -58,8 +58,14 @@ const FONT_STYLE = (
       border-color: #BA0F0F !important;
     }
     .btn-brown {
-      color: #857763 !important;
-      border-color: #857763 !important;
+      background-color: #675230 !important;
+      color: #F3F0E8 !important;
+      border-color: #675230 !important;
+    }
+    .btn-brown:active {
+      background-color: #675230 !important;
+      color: #F3F0E8 !important;
+      border-color: #675230 !important;
     }
     .btn-plus {
       background-color: #2B7056 !important;
@@ -70,6 +76,12 @@ const FONT_STYLE = (
     .btn-plus:active {
       background-color: #1B4A38 !important;
       color: #FFFFFF !important;
+    }
+    .btn-lang-off {
+      color: #8F988A !important;
+    }
+    .btn-lang {
+      border-width: 0 !important;
     }
     .btn-guest:active {
       color: #857763 !important;
@@ -825,8 +837,7 @@ function AuthScreen({ onEnter, lang, setLang }) {
       <div className="absolute right-4 flex rounded-full border border-[#E4DFCF] bg-white/70 p-1 gap-0.5" style={{ top: "calc(env(safe-area-inset-top, 0px) + 14px)" }}>
         {[["zh", "中"], ["en", "EN"]].map(([k, label]) => (
           <button key={k} type="button" onClick={() => setLang(k)} aria-label={k}
-            style={lang === k ? { backgroundColor: "#2D3D2E", color: "#F3F0E8" } : { backgroundColor: "transparent", color: "#8F988A" }}
-            className="min-w-[40px] h-8 px-2.5 rounded-full text-[14px] font-semibold !border-0 transition">
+            className={`min-w-[40px] h-8 px-2.5 rounded-full text-[14px] font-semibold !border-0 transition btn-lang ${lang === k ? "btn-brown" : "btn-lang-off"}`}>
             {label}
           </button>
         ))}
@@ -958,6 +969,7 @@ function LogUsageScreen({ lang, record, onCancel, onSave }) {
     <div className="fixed inset-0 bg-black/30 flex items-end justify-center z-50" onClick={onCancel}>
       <div className="bg-white rounded-t-3xl w-full max-w-2xl h-[90vh] h-[90dvh] overflow-y-auto overflow-x-hidden touch-pan-y font-body text-[#2E2A24] safe-pb" onClick={(e) => e.stopPropagation()}>
         {FONT_STYLE}
+        <div className="sticky top-0 z-20 bg-white rounded-t-3xl">
         <div className="flex justify-center pt-3">
           <div className="w-10 h-1.5 rounded-full bg-[#D9D2C2]" />
         </div>
@@ -969,6 +981,7 @@ function LogUsageScreen({ lang, record, onCancel, onSave }) {
             {t("action_save")}
           </button>
         </header>
+        </div>
 
         <main className="px-4 pb-8">
           <div className="bg-white rounded-2xl border border-[#E4DFCF] overflow-hidden mb-4">
@@ -1397,7 +1410,7 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
       <>
       <div className="min-h-screen w-full bg-[#E0E6DA] font-body text-[#2E2A24]">
         {FONT_STYLE}
-        <header className="max-w-2xl mx-auto px-6 pt-[25px] pb-5">
+        <header className="max-w-2xl mx-auto px-6 pt-[25px] pb-4">
           <div className="flex items-start justify-between">
             <div className="flex flex-col items-start gap-3">
               <button onClick={onCancel} className="btn-plain text-[16px] text-[#6B6558] hover:text-[#2B7056] flex items-center gap-1">
@@ -1414,7 +1427,7 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
               </button>
             </div>
           </div>
-          <div className="mt-4 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
+          <div className="mt-3 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
         </header>
 
         <main className="max-w-2xl mx-auto px-6 pb-24">
@@ -1567,7 +1580,7 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
       <div className={isSheet ? "bg-white rounded-t-3xl w-full max-w-2xl h-[90vh] h-[90dvh] overflow-y-auto overflow-x-hidden touch-pan-y font-body text-[#2E2A24] safe-pb" : "contents"}
         onClick={isSheet ? (e) => e.stopPropagation() : undefined}>
       {isSheet ? (
-        <>
+        <div className="sticky top-0 z-20 bg-white rounded-t-3xl">
           <div className="flex justify-center pt-3"><div className="w-10 h-1.5 rounded-full bg-[#D9D2C2]" /></div>
           <header className="flex items-center justify-between px-4 pt-3 pb-3">
             <button onClick={onCancel} className="text-[14px] px-3 py-1.5 rounded-full border">{t("add_cancel")}</button>
@@ -1576,9 +1589,9 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
               {t("action_save")}
             </button>
           </header>
-        </>
+        </div>
       ) : (
-      <header className="max-w-2xl mx-auto px-6 pt-[25px] pb-5">
+      <header className="max-w-2xl mx-auto px-6 pt-[25px] pb-4">
         <div className="flex items-start justify-between">
           <button onClick={onCancel} className="btn-plain text-[16px] text-[#6B6558] hover:text-[#2B7056] flex items-center gap-1 mb-4">
             {t("add_back")}
@@ -1594,7 +1607,7 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
             </div>
           )}
         </div>
-        <div className="mt-4 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
+        <div className="mt-3 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
       </header>
       )}
 
@@ -1933,16 +1946,16 @@ function HomeTab({ lang, records, userEmail, nickname, isGuest, onAdd, onGoRecor
     .sort((a, b) => (b.r.favoriteAt || 0) - (a.r.favoriteAt || 0) || a.i - b.i).map(({ r }) => r);
   return (
     <div>
-      <header className="pt-[25px] pb-5">
+      <header className="pt-[25px] pb-4">
         <p className="text-[16px] text-[#8A8371]">{t("home_welcome")}</p>
         <h1 className="font-display text-2xl md:text-3xl text-[#1B4A38] font-700 mt-1">
           {nickname || (isGuest ? t("home_guest") : userEmail)}
         </h1>
         <p className="mt-2 text-[14px] text-[#6B6558]">{t("tagline")}</p>
-        <button onClick={onAdd} className="mt-4 rounded-full bg-[#2B7056] hover:bg-[#1B4A38] text-white text-[14px] px-3 py-2 transition">
+        <button onClick={onAdd} className="mt-3 rounded-full bg-[#2B7056] hover:bg-[#1B4A38] text-white text-[14px] px-3 py-2 transition">
           {t("home_addBtn")}
         </button>
-        <div className="mt-5 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
+        <div className="mt-4 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
       </header>
 
       <div className="mb-8">
@@ -2003,24 +2016,15 @@ function RecordListCard({ r, lang, t, onClick, compact = false, favInline = fals
   // Left cells (one per row) and right cells (status + info) are laid out in the same grid,
   // so each right-hand item sits on the same line as its left-hand row, with even row spacing.
   const left = [];
-  left.push(<div key="title" className="flex items-center gap-1.5 min-w-0"><p className="font-display text-[18px] text-[#1B4A38] break-words leading-snug min-w-0">{r.cultivar || r.brand}</p>{r.favorite && <FavStar on size={18} />}</div>);
+  left.push(<div key="title" className="flex items-center gap-1.5 min-w-0"><p className="font-display text-[18px] text-[#1B4A38] break-words leading-snug min-w-0" style={{ fontWeight: 700 }}>{r.cultivar || r.brand}</p>{r.favorite && <FavStar on size={18} />}</div>);
   left.push(<p key="brand" className="text-[13px] text-[#8A8371] break-words leading-snug">{r.brand}</p>);
   left.push(<div key="stars"><Stars value={r.rating} size={16} /></div>);
   left.push(
     <div key="cat" className="flex flex-nowrap gap-1.5 min-w-0">
       {r.category && <Tag tone="neutral" style={CATEGORY_TAG_STYLE[r.category]} className="whitespace-nowrap shrink-0 !text-[13px]">{CATEGORY_LABEL[r.category] ? CATEGORY_LABEL[r.category][lang] : r.category}</Tag>}
       {r.usage && <Tag tone="gold" className="whitespace-nowrap !text-[13px]">{USAGE_LABEL[r.usage] ? USAGE_LABEL[r.usage][lang] : r.usage}</Tag>}
-      {!compact && r.teaStyle && <Tag tone="gold" className="whitespace-nowrap !text-[13px]">{TEA_STYLE_LABEL[r.teaStyle] ? TEA_STYLE_LABEL[r.teaStyle][lang] : r.teaStyle}</Tag>}
-      {compact && (r.occasions || []).length > 0 && (() => { const o = r.occasions[0]; return <Tag key="occ1" tone="neutral" className="min-w-0 truncate whitespace-nowrap !text-[13px]">{OCC_LABEL[o] ? OCC_LABEL[o][lang] : o}</Tag>; })()}
     </div>
   );
-  if (!compact && (r.occasions || []).length > 0) {
-    left.push(
-      <div key="occ" className="flex flex-nowrap gap-1.5 min-w-0">
-        {(r.occasions || []).slice(0, 2).map((o) => <Tag key={o} tone="neutral" className="min-w-0 truncate whitespace-nowrap !text-[13px]">{OCC_LABEL[o] ? OCC_LABEL[o][lang] : o}</Tag>)}
-      </div>
-    );
-  }
   if (!compact) {
     const srcLabel = r.priceSource ? (PRICE_SOURCE_LABEL[r.priceSource] ? PRICE_SOURCE_LABEL[r.priceSource][lang] : r.priceSource) : "";
     const priceText = r.currency === PRICE_NA
@@ -2042,9 +2046,7 @@ function RecordListCard({ r, lang, t, onClick, compact = false, favInline = fals
     if (finished) right.push(<span key="fin" className={infoCls}>{t("status_finishedDate")} {finished}</span>);
   }
   if (status === "使用中") {
-    const remaining = computeRemaining(r);
     const openedDay = daysSince(r.openedDate);
-    if (Number(r.initialWeight) > 0) right.push(<span key="rem" className="text-[13px] text-[#B0A990] whitespace-nowrap">{remaining}g</span>);
     if (openedDay !== null) {
       right.push(<span key="day" className={`text-[13px] whitespace-nowrap ${openedDay + 1 >= 31 ? "text-[#C0392B]" : "text-[#B0A990]"}`}>{t("status_openedDay")}{openedDay + 1}{t("status_openedDaySuffix")}</span>);
     }
@@ -2055,9 +2057,9 @@ function RecordListCard({ r, lang, t, onClick, compact = false, favInline = fals
   for (let i = 0; i < rows; i++) {
     const l = left[i], rr = right[i];
     cells.push(
-      <div key={`l${i}`} className={`min-h-[28px] flex items-center min-w-0 ${rr ? "" : "col-span-2"}`}>{l}</div>
+      <div key={`l${i}`} className={`min-h-[23px] flex items-center min-w-0 ${rr ? "" : "col-span-2"}`}>{l}</div>
     );
-    if (rr) cells.push(<div key={`r${i}`} className="min-h-[28px] flex items-center justify-end text-right">{rr}</div>);
+    if (rr) cells.push(<div key={`r${i}`} className="min-h-[23px] flex items-center justify-end text-right">{rr}</div>);
     if (!l && rr) { /* right-only row: leave left cell empty (already pushed) */ }
   }
 
@@ -2066,7 +2068,7 @@ function RecordListCard({ r, lang, t, onClick, compact = false, favInline = fals
       className="group relative rounded-2xl border border-[#E4DFCF] bg-white/70 p-4 hover:shadow-md hover:border-[#8DC48D] transition cursor-pointer">
       <div className="flex items-start gap-4">
         <div><RecordIcon record={r} size={72} /></div>
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 flex-1 min-w-0 items-center">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-[1.5px] flex-1 min-w-0 items-center">
           {cells}
         </div>
       </div>
@@ -2139,17 +2141,17 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
 
   return (
     <div>
-      <header className="pt-[25px] pb-5">
+      <header className="pt-[25px] pb-4">
         <div className="flex items-center justify-between gap-3">
           <h1 className="font-display text-2xl md:text-3xl text-[#1B4A38] font-700">{t("records_title")}</h1>
           <button onClick={onAdd} aria-label={t("home_addBtn")} className="btn-plus w-9 h-9 text-[22px] leading-none flex items-center justify-center transition shrink-0" style={{ width: 36, height: 36, position: "fixed", top: "calc(env(safe-area-inset-top) + 20px)", right: "max(24px, calc((100vw - 768px) / 2 + 24px))", zIndex: 40 }}>
             +
           </button>
         </div>
-        <div className="mt-4 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
+        <div className="mt-3 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
       </header>
 
-      <section className="grid grid-cols-2 gap-3 mb-5">
+      <section className="grid grid-cols-2 gap-3 mb-4">
         <div className="rounded-2xl border border-[#E4DFCF] bg-white/60 px-4 py-3 flex flex-col gap-0.5">
           <span className="text-[17px] tracking-wider text-[#8A8371]">{t("records_totalUsed")}</span>
           <span className="font-display text-[17px] text-[#2B7056]">{totalUsedGrams}g</span>
@@ -2160,7 +2162,7 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
         </div>
       </section>
 
-      <section className="flex flex-col gap-3 mb-6">
+      <section className="flex flex-col gap-3 mb-5">
         <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("records_search")}
           className="w-full rounded-full border border-[#E4DFCF] bg-white px-4 py-2.5 text-[14px] outline-none focus:border-[#8DC48D] focus:ring-2 focus:ring-[#BDDBBD] transition" />
 
@@ -2281,9 +2283,9 @@ function ExpiryTab({ lang, records, onUpdate }) {
 
   return (
     <div>
-      <header className="pt-[25px] pb-5">
+      <header className="pt-[25px] pb-4">
         <h1 className="font-display text-2xl md:text-3xl text-[#1B4A38] font-700">{t("expiry_title")}</h1>
-        <div className="mt-4 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
+        <div className="mt-3 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
       </header>
 
       {rows.length === 0 ? (
@@ -2299,41 +2301,39 @@ function ExpiryTab({ lang, records, onUpdate }) {
                 <div className="flex gap-4 items-start">
                   <RecordIcon record={r} size={48} />
                   <div className="min-w-0 flex-1">
-                    <p className="font-display text-[18px] text-[#1B4A38] truncate">{r.cultivar || r.brand}</p>
+                    <p className="font-display text-[18px] text-[#1B4A38] truncate" style={{ fontWeight: 700 }}>{r.cultivar || r.brand}</p>
                     <p className="text-[13px] text-[#8A8371] truncate">{r.brand}</p>
                     <div className="flex flex-wrap gap-1.5 mt-1.5">
                       {r.category && <Tag tone="neutral" style={CATEGORY_TAG_STYLE[r.category]} className="!text-[13px]">{CATEGORY_LABEL[r.category] ? CATEGORY_LABEL[r.category][lang] : r.category}</Tag>}
                     </div>
-                    <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                    {Number(r.initialWeight) > 0 && (
+                      <p className="text-[14px] text-[#8A8371] mt-1.5">{t("weight_remaining")} {computeRemaining(r)}g</p>
+                    )}
+                    <div className="flex flex-col items-start gap-1.5 mt-1.5">
                       <span className={`inline-block text-[13px] px-2 py-0.5 rounded-full border ${b.cls}`}>{b.text}</span>
                       {targetStr && (
                         <span className="text-[14px] text-[#45320F]">{t("expiry_dateLabel")} {targetStr}</span>
                       )}
-                      {Number(r.initialWeight) > 0 && (
-                        <span className="text-[14px] text-[#8A8371]">{t("weight_remaining")} {computeRemaining(r)}g</span>
-                      )}
                     </div>
                   </div>
-                  <button onClick={() => toggleStatus(r)}
-                    className="text-[14px] px-2.5 py-1 rounded-full border border-[#8DC48D] text-[#2B7056] hover:bg-[#EAF3E8] transition shrink-0">
-                    {r.openedDate ? t("expiry_markUnopened") : t("expiry_markOpened")}
-                  </button>
                 </div>
 
                 {r.openedDate && (
-                  <div className="grid grid-cols-2 gap-3 mt-3 pl-[64px]">
-                    <div className="flex flex-col gap-1">
+                  <div className="grid gap-3 mt-3 pl-[64px]" style={{ gridTemplateColumns: "min(50%, 7.5rem) minmax(0, 1fr)" }}>
+                    <div className="flex flex-col gap-0">
                       <FieldLabel icon="calendar">{t("expiry_openedDate")}</FieldLabel>
-                      <DateInput value={r.openedDate} onChange={(e) => onUpdate(r.id, { openedDate: formatDMYInput(e.target.value) })}
-                        small hideIcon className="rounded-lg border border-[#E4DFCF] px-2 py-1.5 text-[14px] outline-none focus:border-[#8DC48D]" />
+                      <div className="pl-[26px]">
+                        <DateInput value={r.openedDate} onChange={(e) => onUpdate(r.id, { openedDate: formatDMYInput(e.target.value) })}
+                          small hideIcon readOnly className="border-0 bg-transparent px-0 pt-0.5 pb-1 text-[14px] text-[#8A8371] outline-none" />
+                      </div>
                     </div>
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-0">
                       <FieldLabel icon="clock">{t("expiry_days")}</FieldLabel>
                       {(() => {
                         const od = daysSince(r.openedDate);
                         const n = od === null ? null : od + 1;
                         return (
-                          <div className={`rounded-lg border border-[#E4DFCF] bg-[#F8F6EF] px-2 py-1.5 text-[14px] ${n !== null && n >= 31 ? "text-[#C0392B]" : "text-[#6B6558]"}`}>
+                          <div className={`pl-[26px] pt-0.5 pb-1 text-[14px] ${n !== null && n >= 31 ? "text-[#C0392B]" : "text-[#8A8371]"}`}>
                             {n === null ? "—" : `${n}${{ zh: "天", en: " days" }[lang] || " days"}`}
                           </div>
                         );
@@ -2512,13 +2512,18 @@ function VideoPlayer({ m, className }) {
   const url = useMediaUrl(m.id);
   const [ratio, setRatio] = useState(m.w && m.h ? m.w / m.h : null);
   const portrait = ratio !== null && ratio < 1;
-  // keep the real proportion (16:9, 9:16, ...): never stretch; tall portrait videos are capped in height
-  const style = ratio
-    ? { aspectRatio: String(ratio), objectFit: "contain", ...(portrait ? { maxHeight: "70dvh", width: "auto", maxWidth: "100%", margin: "0 auto" } : {}) }
-    : { objectFit: "contain" };
+  const onMeta = (e) => { const v = e.currentTarget; if (v.videoWidth && v.videoHeight) setRatio(v.videoWidth / v.videoHeight); };
+  // the frame has the video's real proportion (16:9, 9:16, ...) and the video is letterboxed inside it ("contain"), so it can never be stretched;
+  // tall portrait videos are capped at 70% of the screen height by narrowing the frame, not by squashing the picture
+  if (!ratio) {
+    return <video src={url || undefined} poster={m.poster || undefined} controls playsInline preload="metadata" className={className} style={{ objectFit: "contain" }} onLoadedMetadata={onMeta} />;
+  }
   return (
-    <video src={url || undefined} poster={m.poster || undefined} controls playsInline preload="metadata" className={className} style={style}
-      onLoadedMetadata={(e) => { const v = e.currentTarget; if (v.videoWidth && v.videoHeight) setRatio(v.videoWidth / v.videoHeight); }} />
+    <div className="overflow-hidden rounded-xl border border-[#E4DFCF] bg-black"
+      style={{ width: portrait ? `min(100%, calc(70dvh * ${ratio}))` : "100%", aspectRatio: String(ratio), margin: "0 auto" }}>
+      <video src={url || undefined} poster={m.poster || undefined} controls playsInline preload="metadata"
+        style={{ display: "block", width: "100%", height: "100%", objectFit: "contain" }} onLoadedMetadata={onMeta} />
+    </div>
   );
 }
 function MediaItem({ m, className, draggable }) {
@@ -2710,7 +2715,7 @@ function TeaVisitTab({ lang, visits, setVisits }) {
               </button>
             </div>
           </div>
-          <div className="mt-4 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
+          <div className="mt-3 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
         </header>
         <section className="rounded-3xl border border-[#E4DFCF] bg-white/70 p-6">
           <div className="flex flex-col divide-y divide-[#E4DFCF]">
@@ -2761,7 +2766,7 @@ function TeaVisitTab({ lang, visits, setVisits }) {
           </button>
         )}
       </header>
-      <div className="mt-5 mb-6 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
+      <div className="mt-4 mb-5 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
 
       {editing && !editing._new && (
         <section className="rounded-3xl border border-[#E4DFCF] bg-white/70 p-6 mb-6">
@@ -2883,12 +2888,14 @@ function TeaVisitTab({ lang, visits, setVisits }) {
       {editing && editing._new && (
         <div className="fixed inset-0 bg-black/30 flex items-end justify-center z-50" onClick={cancelEdit}>
           <div className="bg-white rounded-t-3xl w-full max-w-2xl h-[90vh] h-[90dvh] overflow-y-auto overflow-x-hidden touch-pan-y font-body text-[#2E2A24] safe-pb" onClick={(e) => e.stopPropagation()}>
+            <div className="sticky top-0 z-20 bg-white rounded-t-3xl">
             <div className="flex justify-center pt-3"><div className="w-10 h-1.5 rounded-full bg-[#D9D2C2]" /></div>
             <header className="flex items-center justify-between px-4 pt-3 pb-3">
               <button onClick={cancelEdit} className="text-[14px] px-3 py-1.5 rounded-full border">{t("add_cancel")}</button>
               <h1 className="font-display text-[16px] font-700 text-[#1B4A38]">{t("visit_add")}</h1>
               <button onClick={save} className="text-[14px] px-3 py-1.5 rounded-full border text-[#2B7056] font-medium">{t("action_save")}</button>
             </header>
+            </div>
             <div className="px-6 pb-8">
           <div className="grid grid-cols-1 gap-4">
               <div className="flex flex-col gap-1">
@@ -3025,7 +3032,7 @@ function TeaVisitTab({ lang, visits, setVisits }) {
             <article key={v.id} onClick={() => setViewingId(v.id)}
               className="rounded-2xl border border-[#E4DFCF] bg-white/70 px-4 pt-2 pb-3 hover:shadow-md hover:border-[#8DC48D] transition cursor-pointer">
               <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-0.5 items-center">
-                <p className="min-h-[24px] flex items-center font-display text-[18px] text-[#1B4A38] break-words leading-snug">{v.store}</p>
+                <p className="min-h-[24px] flex items-center font-display text-[18px] text-[#1B4A38] break-words leading-snug" style={{ fontWeight: 700 }}>{v.store}</p>
                 <span className="text-[13px] text-[#B0A990] whitespace-nowrap text-right">{v.date}</span>
                 {v.address && <p className="col-span-2 text-[13px] text-[#8A8371] break-words leading-snug">{v.address}</p>}
                 {v.cultivar && <p className="col-span-2 text-[13px] text-[#8A8371] break-words leading-snug">{v.cultivar}</p>}
@@ -3090,12 +3097,12 @@ function StatsTab({ lang, records }) {
 
   return (
     <div>
-      <header className="pt-[25px] pb-5">
+      <header className="pt-[25px] pb-4">
         <h1 className="font-display text-2xl md:text-3xl text-[#1B4A38] font-700">{t("stats_title")}</h1>
-        <div className="mt-4 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
+        <div className="mt-3 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
       </header>
 
-      <div className="flex flex-wrap gap-2 items-center mb-6">
+      <div className="flex flex-wrap gap-2 items-center mb-5">
         <span className="text-[14px] text-[#8A8371] mr-1">{t("stats_filterYear")}</span>
         <button onClick={() => setPeriodYear("全部")}
           className={`text-[14px] px-2.5 py-1 rounded-full border transition ${periodYear === "全部" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
@@ -3109,7 +3116,7 @@ function StatsTab({ lang, records }) {
         ))}
       </div>
 
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {[
           { label: t("stat_total"), value: filteredRecords.length, icon: "glass", unit: { zh: "罐/袋", en: "cans/bags" }[lang] },
           { label: t("stat_topBrand"), value: topOf(filteredRecords, "brand"), icon: "shop" },
@@ -3131,7 +3138,7 @@ function StatsTab({ lang, records }) {
       )}
 
       {priceRows.length > 0 && (
-        <div className="mt-8">
+        <div className="mt-6">
           <h2 className="font-display text-[17px] text-[#1B4A38] mb-3">{t("stats_priceBreakdown")}</h2>
           {[[priceTop, priceSplit ? t("stats_priceTop") : null], [priceLow, priceSplit ? t("stats_priceLow") : null]].map(([group, caption], gi) => group.length > 0 && (
             <div key={gi} className={gi > 0 ? "mt-4" : ""}>
@@ -3163,7 +3170,7 @@ function StatsTab({ lang, records }) {
       )}
 
       {filteredRecords.length > 0 && (
-        <div className="mt-8">
+        <div className="mt-6">
           <div>
             <h2 className="font-display text-[17px] text-[#1B4A38] mb-3">{t("stats_occasionBreakdown")}</h2>
             {(() => {
@@ -3270,9 +3277,9 @@ function FeedbackTab({ lang }) {
 
   return (
     <div>
-      <header className="pt-[25px] pb-5">
+      <header className="pt-[25px] pb-4">
         <h1 className="font-display text-2xl md:text-3xl text-[#1B4A38] font-700">{t("feedback_title")}</h1>
-        <div className="mt-4 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
+        <div className="mt-3 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
       </header>
 
       <section className="rounded-3xl border border-[#E4DFCF] bg-white/70 p-6 max-w-xl">
@@ -3398,9 +3405,9 @@ function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, 
 
   return (
     <div>
-      <header className="pt-[25px] pb-5">
+      <header className="pt-[25px] pb-4">
         <h1 className="font-display text-2xl md:text-3xl text-[#1B4A38] font-700">{t("settings_title")}</h1>
-        <div className="mt-4 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
+        <div className="mt-3 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
       </header>
 
       <section className="rounded-3xl border border-[#E4DFCF] bg-white/70 p-6 max-w-xl mb-6">
