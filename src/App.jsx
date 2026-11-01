@@ -61,6 +61,16 @@ const FONT_STYLE = (
       color: #857763 !important;
       border-color: #857763 !important;
     }
+    .btn-plus {
+      background-color: #2B7056 !important;
+      color: #FFFFFF !important;
+      border: none !important;
+      border-radius: 8px !important;
+    }
+    .btn-plus:active {
+      background-color: #1B4A38 !important;
+      color: #FFFFFF !important;
+    }
     .btn-guest:active {
       color: #857763 !important;
       border-color: transparent !important;
@@ -73,16 +83,16 @@ const FONT_STYLE = (
 
 const TEA_CATEGORIES = ["抹茶", "焙茶", "玄米茶", "其他"];
 const CATEGORY_LABEL = {
-  "抹茶": { zh: "抹茶", en: "Matcha", ja: "抹茶" },
-  "焙茶": { zh: "焙茶", en: "Hojicha", ja: "ほうじ茶" },
-  "玄米茶": { zh: "玄米茶", en: "Genmaicha", ja: "玄米茶" },
-  "其他": { zh: "其他", en: "Other", ja: "その他" },
+  "抹茶": { zh: "抹茶", en: "Matcha" },
+  "焙茶": { zh: "焙茶", en: "Hojicha" },
+  "玄米茶": { zh: "玄米茶", en: "Genmaicha" },
+  "其他": { zh: "其他", en: "Other" },
 };
 
 const TEA_STYLES = ["濃茶", "薄茶"];
 const TEA_STYLE_LABEL = {
-  "濃茶": { zh: "濃茶", en: "Koicha (Thick Tea)", ja: "濃茶" },
-  "薄茶": { zh: "薄茶", en: "Usucha (Thin Tea)", ja: "薄茶" },
+  "濃茶": { zh: "濃茶", en: "Koicha (Thick Tea)" },
+  "薄茶": { zh: "薄茶", en: "Usucha (Thin Tea)" },
 };
 
 const MATCHA_BRANDS = [
@@ -197,23 +207,23 @@ function getOccasions(category) {
 }
 
 const OCC_LABEL = {
-  "抹茶拿鐵": { zh: "抹茶拿鐵", en: "Matcha Latte", ja: "抹茶ラテ" },
-  "焙茶拿鐵": { zh: "焙茶拿鐵", en: "Hojicha Latte", ja: "ほうじ茶ラテ" },
-  "玄米茶拿鐵": { zh: "玄米茶拿鐵", en: "Genmaicha Latte", ja: "玄米茶ラテ" },
-  "純飲": { zh: "純飲", en: "Straight (Usucha)", ja: "そのまま飲む" },
-  "烘焙": { zh: "烘焙", en: "Baking", ja: "製菓・焼き菓子" },
-  "入饌": { zh: "入饌", en: "Cooking", ja: "料理" },
-  "其他": { zh: "其他", en: "Other", ja: "その他" },
+  "抹茶拿鐵": { zh: "抹茶拿鐵", en: "Matcha Latte" },
+  "焙茶拿鐵": { zh: "焙茶拿鐵", en: "Hojicha Latte" },
+  "玄米茶拿鐵": { zh: "玄米茶拿鐵", en: "Genmaicha Latte" },
+  "純飲": { zh: "純飲", en: "Straight (Usucha)" },
+  "烘焙": { zh: "烘焙", en: "Baking" },
+  "入饌": { zh: "入饌", en: "Cooking" },
+  "其他": { zh: "其他", en: "Other" },
 };
 const USAGE_LABEL = {
-  "茶筅刷茶": { zh: "茶筅刷茶", en: "Whisked (Chasen)", ja: "茶筅で点てる" },
-  "打泡器刷茶": { zh: "打泡器刷茶", en: "Milk Frother", ja: "泡立て器" },
-  "茶粉手搖杯": { zh: "茶粉手搖杯", en: "Shaker Bottle", ja: "シェイカーボトル" },
-  "其他": { zh: "其他", en: "Other", ja: "その他" },
+  "茶筅刷茶": { zh: "茶筅刷茶", en: "Whisked (Chasen)" },
+  "打泡器刷茶": { zh: "打泡器刷茶", en: "Milk Frother" },
+  "茶粉手搖杯": { zh: "茶粉手搖杯", en: "Shaker Bottle" },
+  "其他": { zh: "其他", en: "Other" },
 };
 const STATUS_LABEL = {
-  "未開封": { zh: "未開封", en: "Unopened", ja: "未開封" },
-  "已開封": { zh: "已開封", en: "Opened", ja: "開封済み" },
+  "未開封": { zh: "未開封", en: "Unopened" },
+  "已開封": { zh: "已開封", en: "Opened" },
 };
 
 const RATING_FILL = { 1: "#D7E8D2", 2: "#BDDBBD", 3: "#8DC48D", 4: "#4F9A6F", 5: "#2B7056" };
@@ -353,7 +363,7 @@ const STR = {
     settings_data: "資料管理",
     settings_export: "匯出備份", settings_import: "匯入備份", settings_clear: "清除所有資料",
     settings_backup_busy: "處理中，請稍候…", settings_backup_done: "備份檔已匯出", settings_backup_fail: "匯出失敗，請再試一次", settings_backup_restored: "備份已匯入", settings_backup_badfile: "檔案無法讀取，請確認是 Matcha Log 的備份檔",
-    settings_clear_confirm: "確定要清除所有紀錄嗎？此操作無法復原。",
+    settings_clear_confirm: "確定要清除所有紀錄嗎？此操作無法復原",
     settings_clear_yes: "確認清除",
     settings_storage_note: "資料只會儲存於本裝置，一旦清除瀏覽器紀錄或於手機主畫面移除web app，資料會一同清除",
     auth_guest: "以訪客身份繼續",
@@ -446,90 +456,6 @@ const STR = {
     delete_cancel: "Cancel", delete_yes: "Confirm Delete",
     label_validUntil: "Valid until",
     status_finishedDate: "Finished on",
-  },
-  ja: {
-    appName: "抹茶ログ", appSub: "Matcha Log",
-    tagline: "抹茶一杯ごとの銘柄、風味、気分を記録しよう",
-    nav_home: "ホーム", nav_records: "記録", nav_expiry: "賞味期限",
-    visit_title: "お茶訪問", visit_sortNew: "新しい順", visit_sortOld: "古い順", visit_tagline: "一杯の良いお茶で、素敵なひとときを。", visit_add: "訪問を追加", visit_store: "お店", visit_address: "地域・住所", visit_date: "訪問日（年/月/日）", visit_comment: "コメント", visit_photo: "写真・動画（任意）", visit_photo_add: "写真・動画を追加", visit_video_long: "動画は1分30秒以内にしてください", visit_video_big: "動画ファイルが大きすぎます（上限200MB）", visit_video_bad: "この動画を読み込めません", visit_save: "保存", visit_delete: "削除", visit_empty: "お茶訪問の記録はまだありません", visit_rating_err: "評価を選んでください", visit_drag_hint: "⠿ を押したままドラッグして写真の順番を変更", nav_visit: "訪問",
-    nav_stats: "統計", nav_feedback: "フィードバック", nav_settings: "設定",
-    home_welcome: "おかえりなさい！", home_guest: "ゲストモード",
-    home_recent: "最近の記録", home_fav: "お気に入り", home_fav_empty: "お気に入りはまだありません", fav_toggle: "お気に入り", home_viewAll: "すべて見る",
-    home_addBtn: "＋ 記録を追加",
-    home_empty: "まだ記録がありません。最初の一杯を記録しましょう！",
-    stat_total: "総記録数", stat_topBrand: "よく飲むブランド",
-    stat_topOccasion: "よくある用途", stat_avg: "平均評価",
-    records_title: "記録",
-    records_search: "ブランド、産地、店舗、メモを検索...",
-    filter_occasion: "用途", filter_rating: "評価", filter_all: "すべて",
-    filter_category: "種類",
-    filter_price: "価格", price_asc: "安い順", price_desc: "高い順",
-    records_totalUsed: "累計使用量", records_usageCount: "総使用回数", records_countUnit: "回",
-    usage_earliest: "開封が古い順", usage_latest: "開封が新しい順", filter_usageDate: "使用日",
-    records_empty: "条件に合う記録が見つかりません。キーワードや条件を変えてみてください。",
-    add_title: "記録を追加", edit_title: "記録を編集", add_back: "← 戻る",
-    add_photo: "抹茶の写真", add_photo_hint: "写真をアイコンとしてアップロード（任意）",
-    add_photo_remove: "写真を削除", photo_new: "写真を追加", photo_change: "写真を変更",
-    add_brand: "ブランド *", add_brand_ph: "ブランドを選択", add_brand_other_ph: "ブランド名を入力",
-    add_category: "茶の種類", add_category_ph: "種類を選択", add_category_other_ph: "種類を入力",
-    add_origin: "産地", add_cultivar: "銘柄・商品名", add_origin_ph: "産地を入力",
-    add_weight: "初期重量",
-    add_openedDate: "開封日（年/月/日）", add_expiryDays: "開封後の日数（最大30日）",
-    add_status: "状態", add_finishedDate: "使い切った日（年/月/日）",
-    add_suggestedExpiry: "開封後の推奨賞味期限",
-    weight_remaining: "残量", weight_log: "使用履歴", weight_add: "使用を記録", weight_add_title: "使用記録を追加",
-    weight_amount: "使用量（g）", weight_save: "使用記録を保存", weight_empty: "まだ使用記録がありません",
-    action_edit: "編集", action_save: "保存",
-    weight_useDate: "使用日（年/月/日）", weight_useTime: "使用時間", weight_note: "メモ（任意）",
-    weight_useDate_label: "使用日", weight_amount_label: "使用量", weight_maxPrefix: "最大",
-    weight_afterPreview: "今回の使用後、残量は次のようになります：",
-    weight_note_ph: "例：牛乳200ml、甘さ控えめ、なめらかな味！",
-    weight_usedUp: "使い切りました",
-    status_all: "すべて", status_inUse: "使用中", status_unopened: "未開封", status_used: "使い切り",
-    status_openedDay: "開封", status_openedDaySuffix: "日目",
-    status_untilExpiry: "推奨期限まで",
-    status_daySuffix: "日",
-    add_purchaseDate: "購入日（年/月/日）", add_store: "購入店舗・場所",
-    add_price: "価格",
-    price_na: "該当なし", add_priceSource: "入手元",
-    add_unsealedExpiry: "未開封賞味期限（年/月/日）*",
-    add_rating: "評価 *",
-    add_notes: "メモ（任意）",
-    add_teaStyle: "点前の種類",
-    add_occasion: "用途 *", add_occasion_other_ph: "用途を入力",
-    add_usage: "使用方法", add_usage_ph: "方法を選択", add_usage_other_ph: "使用方法を入力",
-    add_cancel: "キャンセル", add_save: "記録を保存",
-    date_err: "年/月/日の形式で入力してください",
-    expiry_title: "賞味期限リマインダー",
-    expiry_openedDate: "開封日", expiry_days: "開封日数",
-    expiry_markOpened: "開封済みにする", expiry_markUnopened: "未開封に戻す",
-    expiry_noDate: "期限が未設定です", expiry_today: "本日期限", expiry_dateLabel: "賞味期限日",
-    expiry_empty: "現在、記録はありません。",
-    stats_title: "統計",
-    stats_filterYear: "年", stats_filterMonth: "月",
-    stats_priceBreakdown: "価格ランキング（高い順）", stats_priceTop: "最も高い", stats_priceLow: "最も安い", stats_brandBreakdown: "ブランド別内訳", stats_occasionBreakdown: "用途別内訳",
-    feedback_title: "フィードバック", feedback_category: "種類",
-    visit_addBtn: "+ 茶訪を追加",
-    feedback_suggest: "機能提案", feedback_bug: "不具合報告", feedback_other: "その他",
-    feedback_message: "内容", feedback_message_ph: "ご意見をお聞かせください...",
-    feedback_email: "連絡先メール（任意）", feedback_submit: "送信する",
-    feedback_thanks: "フィードバックありがとうございます！", feedback_sending: "送信中...", feedback_error: "送信に失敗しました。接続を確認してもう一度お試しください。",
-    settings_title: "設定", settings_account: "アカウント",
-    settings_guest_hint: "データはこの端末にのみ保存されます。ブラウザの履歴を消去したり、ホーム画面からWebアプリを削除したりすると、データも一緒に消去されます。",
-    settings_login_btn: "ニックネームを変更", settings_nick_label: "ニックネーム", settings_nick_save: "保存", settings_logout: "ログアウト",
-    settings_language: "言語設定",
-    settings_data: "データ管理",
-    settings_export: "バックアップを書き出す", settings_import: "バックアップを読み込む", settings_clear: "すべてのデータを削除",
-    settings_backup_busy: "処理中です…", settings_backup_done: "バックアップを書き出しました", settings_backup_fail: "書き出しに失敗しました。もう一度お試しください", settings_backup_restored: "バックアップを読み込みました", settings_backup_badfile: "ファイルを読み込めません。Matcha Logのバックアップか確認してください",
-    settings_clear_confirm: "本当にすべての記録を削除しますか？この操作は取り消せません。",
-    settings_clear_yes: "削除する",
-    settings_storage_note: "データはこの端末にのみ保存されます。ブラウザの履歴を消去したり、ホーム画面からWebアプリを削除したりすると、データも一緒に消去されます。",
-    auth_guest: "ゲストとして続ける",
-    delete: "削除",
-    delete_confirm_msg: "削除すると元に戻せません",
-    delete_cancel: "キャンセル", delete_yes: "削除を確認",
-    label_validUntil: "賞味期限",
-    status_finishedDate: "使い切った日",
   },
 };
 
@@ -695,13 +621,13 @@ const CURRENCY_OTHER = "其他貨幣";
 const CURRENCIES = ["JPY¥", "CAD$", "CNY¥", "GBP£", "HKD$", "KRW₩", "USD$", CURRENCY_OTHER, PRICE_NA];
 function currencyLabel(c, lang, other) {
   if (c === CURRENCY_OTHER && other) return other;
-  if (c === CURRENCY_OTHER) return { zh: "其他貨幣", en: "Other currency", ja: "その他の通貨" }[lang] || c;
+  if (c === CURRENCY_OTHER) return { zh: "其他貨幣", en: "Other currency" }[lang] || c;
   return c;
 }
 const PRICE_SOURCES = ["親友贈送", "公關邀請/禮物"];
 const PRICE_SOURCE_LABEL = {
-  "親友贈送": { zh: "親友贈送", en: "Gift from friends/family", ja: "家族・友人からの贈り物" },
-  "公關邀請/禮物": { zh: "公關邀請/禮物", en: "PR invitation / gift", ja: "PRご招待・ギフト" },
+  "親友贈送": { zh: "親友贈送", en: "Gift from friends/family" },
+  "公關邀請/禮物": { zh: "公關邀請/禮物", en: "PR invitation / gift" },
 };
 // Approximate static exchange rates to USD, for comparing prices across currencies.
 // NOTE: this is a fixed reference table baked into the app, not a live/hourly feed —
@@ -730,7 +656,7 @@ function suggestedExpiryText(openedDate, lang) {
   if (!opened) return "—";
   const target = new Date(opened.getTime() + 30 * 86400000);
   const pad = (n) => String(n).padStart(2, "0");
-  const unit = { zh: "天", en: " days", ja: "日" }[lang] || " days";
+  const unit = { zh: "天", en: " days" }[lang] || " days";
   return `${target.getFullYear()}/${pad(target.getMonth() + 1)}/${pad(target.getDate())} (30${unit})`;
 }
 
@@ -882,7 +808,6 @@ const LOGO_SRC = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS
 const AUTH_STR = {
   zh: { nick: "您的暱稱", ph: "例：抹茶愛好者 ♡", enter: "歡迎使用Matcha Log！", note: "資料只會儲存於本裝置", guest: "訪客" },
   en: { nick: "Nickname", ph: "e.g. Matcha latte lover", enter: "Welcome to Matcha Log!", note: "Data is stored on this device only", guest: "Guest" },
-  ja: { nick: "ニックネーム", ph: "例：抹茶ラテ好き", enter: "Matcha Logへようこそ！", note: "データはこの端末にのみ保存されます", guest: "ゲスト" },
 };
 
 function AuthScreen({ onEnter, lang, setLang }) {
@@ -898,7 +823,7 @@ function AuthScreen({ onEnter, lang, setLang }) {
     <div className="min-h-screen w-full bg-[#E0E6DA] font-body text-[#2E2A24] flex items-center justify-center px-6" style={{ minHeight: "100dvh" }}>
       {FONT_STYLE}
       <div className="absolute right-4 flex rounded-full border border-[#E4DFCF] bg-white/70 p-1 gap-0.5" style={{ top: "calc(env(safe-area-inset-top, 0px) + 14px)" }}>
-        {[["zh", "中"], ["en", "EN"], ["ja", "あ"]].map(([k, label]) => (
+        {[["zh", "中"], ["en", "EN"]].map(([k, label]) => (
           <button key={k} type="button" onClick={() => setLang(k)} aria-label={k}
             style={lang === k ? { backgroundColor: "#2D3D2E", color: "#F3F0E8" } : { backgroundColor: "transparent", color: "#8F988A" }}
             className="min-w-[40px] h-8 px-2.5 rounded-full text-[14px] font-semibold !border-0 transition">
@@ -1790,9 +1715,9 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
               </div>
               {form.currency === CURRENCY_OTHER && (
                 <div className="flex flex-col gap-1 mt-2">
-                  <FieldLabel icon="coin">{{ zh: "貨幣名稱 / 符號", en: "Currency name / symbol", ja: "通貨名・記号" }[lang]}</FieldLabel>
+                  <FieldLabel icon="coin">{{ zh: "貨幣名稱 / 符號", en: "Currency name / symbol" }[lang]}</FieldLabel>
                   <input value={form.currencyOther || ""} onChange={(e) => update("currencyOther", e.target.value)}
-                    placeholder={{ zh: "例：EUR€、AUD$", en: "e.g. EUR€, AUD$", ja: "例：EUR€、AUD$" }[lang]}
+                    placeholder={{ zh: "例：EUR€、AUD$", en: "e.g. EUR€, AUD$" }[lang]}
                     className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D]" />
                 </div>
               )}
@@ -2217,7 +2142,7 @@ function RecordsTab({ lang, records, onAdd, onEdit, onDelete }) {
       <header className="pt-[25px] pb-5">
         <div className="flex items-center justify-between gap-3">
           <h1 className="font-display text-2xl md:text-3xl text-[#1B4A38] font-700">{t("records_title")}</h1>
-          <button onClick={onAdd} aria-label={t("home_addBtn")} className="w-9 h-9 rounded-lg bg-[#2B7056] hover:bg-[#1B4A38] text-white text-[22px] leading-none flex items-center justify-center transition shrink-0">
+          <button onClick={onAdd} aria-label={t("home_addBtn")} className="btn-plus w-9 h-9 text-[22px] leading-none flex items-center justify-center transition shrink-0" style={{ width: 36, height: 36, position: "fixed", top: "calc(env(safe-area-inset-top) + 20px)", right: "max(24px, calc((100vw - 768px) / 2 + 24px))", zIndex: 40 }}>
             +
           </button>
         </div>
@@ -2340,10 +2265,10 @@ function ExpiryTab({ lang, records, onUpdate }) {
   };
 
   const overdueText = (n) => ({
-    zh: `已過期 ${n} 天`, en: `Overdue ${n}d`, ja: `期限切れ ${n}日`,
+    zh: `已過期 ${n} 天`, en: `Overdue ${n}d`,
   }[lang] || `Overdue ${n}d`);
   const leftText = (n) => ({
-    zh: `剩餘 ${n} 天`, en: `${n}d left`, ja: `残り ${n}日`,
+    zh: `剩餘 ${n} 天`, en: `${n}d left`,
   }[lang] || `${n}d left`);
 
   const badge = (days) => {
@@ -2409,7 +2334,7 @@ function ExpiryTab({ lang, records, onUpdate }) {
                         const n = od === null ? null : od + 1;
                         return (
                           <div className={`rounded-lg border border-[#E4DFCF] bg-[#F8F6EF] px-2 py-1.5 text-[14px] ${n !== null && n >= 31 ? "text-[#C0392B]" : "text-[#6B6558]"}`}>
-                            {n === null ? "—" : `${n}${{ zh: "天", en: " days", ja: "日" }[lang] || " days"}`}
+                            {n === null ? "—" : `${n}${{ zh: "天", en: " days" }[lang] || " days"}`}
                           </div>
                         );
                       })()}
@@ -2466,7 +2391,7 @@ function wrapBrand(name, maxW) {
 
 function PieBreakdown({ rows, labelOf, lang, centerText }) {
   const total = rows.reduce((s, [, c]) => s + c, 0) || 1;
-  const unit = lang === "en" ? "uses" : lang === "ja" ? "回" : "次";
+  const unit = lang === "en" ? "uses" : "次";
   let cursor = 0;
   return (
     <div className="flex items-center justify-center gap-6">
@@ -2831,7 +2756,7 @@ function TeaVisitTab({ lang, visits, setVisits }) {
           <p className="mt-2 text-[14px] text-[#6B6558]">{t("visit_tagline")}</p>
         </div>
         {(!editing || editing._new) && (
-          <button onClick={startAdd} aria-label={t("visit_add")} className="w-9 h-9 rounded-lg bg-[#2B7056] hover:bg-[#1B4A38] text-white text-[22px] leading-none flex items-center justify-center transition shrink-0">
+          <button onClick={startAdd} aria-label={t("visit_add")} className="btn-plus w-9 h-9 text-[22px] leading-none flex items-center justify-center transition shrink-0" style={{ width: 36, height: 36, position: "fixed", top: "calc(env(safe-area-inset-top) + 20px)", right: "max(24px, calc((100vw - 768px) / 2 + 24px))", zIndex: 40 }}>
             +
           </button>
         )}
@@ -2884,9 +2809,9 @@ function TeaVisitTab({ lang, visits, setVisits }) {
               </div>
               {editing.currency === CURRENCY_OTHER && (
                 <div className="flex flex-col gap-1 mt-2">
-                  <FieldLabel icon="coin">{{ zh: "貨幣名稱 / 符號", en: "Currency name / symbol", ja: "通貨名・記号" }[lang]}</FieldLabel>
+                  <FieldLabel icon="coin">{{ zh: "貨幣名稱 / 符號", en: "Currency name / symbol" }[lang]}</FieldLabel>
                   <input value={editing.currencyOther || ""} onChange={(e) => upd("currencyOther", e.target.value)}
-                    placeholder={{ zh: "例：EUR€、AUD$", en: "e.g. EUR€, AUD$", ja: "例：EUR€、AUD$" }[lang]}
+                    placeholder={{ zh: "例：EUR€、AUD$", en: "e.g. EUR€, AUD$" }[lang]}
                     className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D]" />
                 </div>
               )}
@@ -3009,9 +2934,9 @@ function TeaVisitTab({ lang, visits, setVisits }) {
                 </div>
                 {editing.currency === CURRENCY_OTHER && (
                   <div className="flex flex-col gap-1 mt-2">
-                    <FieldLabel icon="coin">{{ zh: "貨幣名稱 / 符號", en: "Currency name / symbol", ja: "通貨名・記号" }[lang]}</FieldLabel>
+                    <FieldLabel icon="coin">{{ zh: "貨幣名稱 / 符號", en: "Currency name / symbol" }[lang]}</FieldLabel>
                     <input value={editing.currencyOther || ""} onChange={(e) => upd("currencyOther", e.target.value)}
-                      placeholder={{ zh: "例：EUR€、AUD$", en: "e.g. EUR€, AUD$", ja: "例：EUR€、AUD$" }[lang]}
+                      placeholder={{ zh: "例：EUR€、AUD$", en: "e.g. EUR€, AUD$" }[lang]}
                       className="rounded-lg border border-[#E4DFCF] px-3 py-2 text-[14px] outline-none focus:border-[#8DC48D]" />
                   </div>
                 )}
@@ -3186,7 +3111,7 @@ function StatsTab({ lang, records }) {
 
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
         {[
-          { label: t("stat_total"), value: filteredRecords.length, icon: "glass", unit: { zh: "罐/袋", en: "cans/bags", ja: "缶/袋" }[lang] },
+          { label: t("stat_total"), value: filteredRecords.length, icon: "glass", unit: { zh: "罐/袋", en: "cans/bags" }[lang] },
           { label: t("stat_topBrand"), value: topOf(filteredRecords, "brand"), icon: "shop" },
         ].map((s) => (
           <div key={s.label} className="rounded-2xl border border-[#E4DFCF] bg-white/60 px-4 py-4 flex flex-col gap-1">
@@ -3522,10 +3447,6 @@ function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, 
             className={`text-[14px] px-3 py-1.5 rounded-full border transition ${lang === "en" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
             English
           </button>
-          <button onClick={() => setLang("ja")}
-            className={`text-[14px] px-3 py-1.5 rounded-full border transition ${lang === "ja" ? "btn-brown" : "border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D]"}`}>
-            日本語
-          </button>
         </div>
       </section>
 
@@ -3543,24 +3464,22 @@ function SettingsTab({ lang, setLang, userEmail, nickname, isGuest, onGoToAuth, 
         </div>
         {(backupBusy || backupMsg) && <p className="text-[14px] text-[#6B6558] mb-4">{backupBusy ? t("settings_backup_busy") : backupMsg}</p>}
 
-        {!confirmClear ? (
-          <button onClick={() => setConfirmClear(true)}
-            className="btn-danger text-[14px] px-3 py-1.5 rounded-full border transition hover:bg-[#F7EAE6]">
-            {t("settings_clear")}
-          </button>
-        ) : (
-          <div className="rounded-lg bg-[#F7EAE6] border border-[#EBCFC6] p-3">
-            <p className="text-[14px] text-[#BA0F0F] mb-3">{t("settings_clear_confirm")}</p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => { setRecords([]); setConfirmClear(false); }}
-                className="btn-danger text-[14px] px-4 py-1 rounded-full border transition hover:bg-[#F7EAE6]"
-              >
-                {t("settings_clear_yes")}
-              </button>
-              <button onClick={() => setConfirmClear(false)} className="text-[14px] px-3 py-1 rounded-full border border-[#E4DFCF] text-[#6B6558] hover:border-[#8DC48D] transition">
-                {t("add_cancel")}
-              </button>
+        <button onClick={() => setConfirmClear(true)}
+          className="btn-danger text-[14px] px-3 py-1.5 rounded-full border transition hover:bg-[#F7EAE6]">
+          {t("settings_clear")}
+        </button>
+        {confirmClear && (
+          <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 px-6" onClick={() => setConfirmClear(false)}>
+            <div className="bg-white rounded-3xl border border-[#E4DFCF] p-6 max-w-xs w-full" onClick={(e) => e.stopPropagation()}>
+              <p className="text-[14px] text-[#2E2A24] mb-5 text-center">{t("settings_clear_confirm")}</p>
+              <div className="flex justify-center gap-3">
+                <button onClick={() => { setRecords([]); setConfirmClear(false); }} className="btn-danger text-[14px] px-4 py-1.5 rounded-full border">
+                  {t("delete_yes")}
+                </button>
+                <button onClick={() => setConfirmClear(false)} className="text-[14px] px-4 py-1.5 rounded-full border border-[#E4DFCF] text-[#6B6558]">
+                  {t("delete_cancel")}
+                </button>
+              </div>
             </div>
           </div>
         )}
