@@ -1427,7 +1427,7 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
       <>
       <div className="min-h-screen w-full bg-[#E0E6DA] font-body text-[#2E2A24]">
         {FONT_STYLE}
-        <header className="max-w-2xl mx-auto px-6 pt-[25px] pb-4">
+        <header className="max-w-2xl mx-auto px-5 pt-[25px] pb-4">
           <div className="flex items-start justify-between">
             <div className="flex flex-col items-start gap-3">
               <button onClick={onCancel} className="btn-plain text-[16px] text-[#6B6558] hover:text-[#2B7056] flex items-center gap-1">
@@ -1447,7 +1447,7 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
           <div className="mt-3 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
         </header>
 
-        <main className="max-w-2xl mx-auto px-6 pb-24">
+        <main className="max-w-2xl mx-auto px-5 pb-24">
           <section className="relative rounded-3xl border border-[#E4DFCF] bg-white/70 p-6">
             {liveRecord.favorite && <span className="absolute top-4 right-4"><FavStar on size={22} /></span>}
             <div className="flex flex-col items-center text-center mb-5">
@@ -1608,7 +1608,7 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
           </header>
         </div>
       ) : (
-      <header className="max-w-2xl mx-auto px-6 pt-[25px] pb-4">
+      <header className="max-w-2xl mx-auto px-5 pt-[25px] pb-4">
         <div className="flex items-start justify-between">
           <button onClick={onCancel} className="btn-plain text-[16px] text-[#6B6558] hover:text-[#2B7056] flex items-center gap-1 mb-4">
             {t("add_back")}
@@ -1628,7 +1628,7 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
       </header>
       )}
 
-      <main className={isSheet ? "px-4 pb-8" : "max-w-2xl mx-auto px-6 pb-24"}>
+      <main className={isSheet ? "px-3 pb-8" : "max-w-2xl mx-auto px-5 pb-24"}>
         <section className={isSheet ? "relative p-2" : "relative rounded-3xl border border-[#E4DFCF] bg-white/70 p-6"}>
           <button type="button" onClick={() => update("favorite", !form.favorite)} aria-label={t("fav_toggle")} aria-pressed={!!form.favorite}
             className="btn-plain absolute top-4 right-4 p-1"><FavStar on={!!form.favorite} size={24} /></button>
@@ -2035,12 +2035,8 @@ function RecordListCard({ r, lang, t, onClick, compact = false, favInline = fals
   const left = [];
   left.push(<div key="title" className="flex items-center gap-1.5 min-w-0"><p className="font-display text-[18px] text-[#1B4A38] break-words leading-snug min-w-0" style={{ fontWeight: 700 }}>{r.cultivar || r.brand}</p>{r.favorite && <FavStar on size={18} />}</div>);
   left.push(<p key="brand" className="text-[13px] text-[#8A8371] break-words leading-snug">{r.brand}</p>);
-  left.push(<div key="stars"><Stars value={r.rating} size={16} /></div>);
-  left.push(
-    <div key="cat" className="flex flex-nowrap gap-1.5 min-w-0">
-      {r.category && <Tag tone="neutral" style={CATEGORY_TAG_STYLE[r.category]} className="whitespace-nowrap shrink-0 !text-[13px]">{CATEGORY_LABEL[r.category] ? CATEGORY_LABEL[r.category][lang] : r.category}</Tag>}
-    </div>
-  );
+  const catEl = r.category && <Tag tone="neutral" style={CATEGORY_TAG_STYLE[r.category]} className="whitespace-nowrap shrink-0 !text-[13px]">{CATEGORY_LABEL[r.category] ? CATEGORY_LABEL[r.category][lang] : r.category}</Tag>;
+  left.push(<div key="cat" className="flex items-center gap-2 min-w-0">{catEl}<Stars value={r.rating} size={16} /></div>);
   if (!compact) {
     const srcLabel = r.priceSource ? (PRICE_SOURCE_LABEL[r.priceSource] ? PRICE_SOURCE_LABEL[r.priceSource][lang] : r.priceSource) : "";
     const priceText = r.currency === PRICE_NA
@@ -2317,13 +2313,13 @@ function ExpiryTab({ lang, records, onUpdate }) {
                   <div className="min-w-0 flex-1">
                     <p className="font-display text-[18px] text-[#1B4A38] truncate" style={{ fontWeight: 700 }}>{r.cultivar || r.brand}</p>
                     <p className="text-[13px] text-[#8A8371] truncate">{r.brand}</p>
-                    <div className="flex flex-wrap gap-1.5 mt-1.5">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5">
                       {r.category && <Tag tone="neutral" style={CATEGORY_TAG_STYLE[r.category]} className="!text-[13px]">{CATEGORY_LABEL[r.category] ? CATEGORY_LABEL[r.category][lang] : r.category}</Tag>}
+                      {Number(r.initialWeight) > 0 && (
+                        <span className="text-[14px] text-[#8A8371]">{t("weight_remaining")} {computeRemaining(r)}g</span>
+                      )}
                     </div>
-                    {Number(r.initialWeight) > 0 && (
-                      <p className="text-[14px] text-[#8A8371] mt-1.5">{t("weight_remaining")} {computeRemaining(r)}g</p>
-                    )}
-                    <div className="flex flex-col items-start gap-1.5 mt-1.5">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 mt-1.5">
                       <span className={`inline-block text-[13px] px-2 py-0.5 rounded-full border ${b.cls}`}>{b.text}</span>
                       {targetStr && (
                         <span className="text-[14px] text-[#45320F]">{t("expiry_dateLabel")} {targetStr}</span>
@@ -2780,7 +2776,7 @@ function TeaVisitTab({ lang, visits, setVisits }) {
           </button>
         )}
       </header>
-      <div className="mt-4 mb-5 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
+      <div className="mt-4 mb-[19px] h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
 
       {editing && !editing._new && (
         <section className="rounded-3xl border border-[#E4DFCF] bg-white/70 p-6 mb-6">
@@ -2861,7 +2857,7 @@ function TeaVisitTab({ lang, visits, setVisits }) {
             </div>
             <div className="flex flex-col gap-1">
               <FieldLabel icon="note">{t("visit_comment")}</FieldLabel>
-              <textarea value={editing.comment} onChange={(e) => upd("comment", e.target.value)} rows={3}
+              <textarea value={editing.comment} onChange={(e) => upd("comment", e.target.value)} rows={6}
                 className={`${inputCls} border-[#E4DFCF] resize-none`} />
             </div>
             <div className="flex flex-col gap-1">
@@ -2910,7 +2906,7 @@ function TeaVisitTab({ lang, visits, setVisits }) {
               <button onClick={save} className="text-[14px] px-3 py-1.5 rounded-full border text-[#2B7056] font-medium">{t("action_save")}</button>
             </header>
             </div>
-            <div className="px-6 pb-8">
+            <div className="px-5 pb-8">
           <div className="grid grid-cols-1 gap-4">
               <div className="flex flex-col gap-1">
                 <FieldLabel icon="shop">{t("visit_store")}</FieldLabel>
@@ -2988,7 +2984,7 @@ function TeaVisitTab({ lang, visits, setVisits }) {
               </div>
               <div className="flex flex-col gap-1">
                 <FieldLabel icon="note">{t("visit_comment")}</FieldLabel>
-                <textarea value={editing.comment} onChange={(e) => upd("comment", e.target.value)} rows={3}
+                <textarea value={editing.comment} onChange={(e) => upd("comment", e.target.value)} rows={6}
                   className={`${inputCls} border-[#E4DFCF] resize-none`} />
               </div>
               <div className="flex flex-col gap-1">
@@ -3296,7 +3292,7 @@ function FeedbackTab({ lang }) {
         <div className="mt-3 h-px w-full bg-gradient-to-r from-[#8DC48D] via-[#E4DFCF] to-transparent" />
       </header>
 
-      <section className="rounded-3xl border border-[#E4DFCF] bg-white/70 p-6 max-w-xl">
+      <section className="rounded-3xl border border-[#E4DFCF] bg-white/70 py-6 px-5 max-w-xl">
         {sent && (
           <p className="text-[14px] text-[#2B7056] bg-[#EAF3E8] border border-[#BDDBBD] rounded-lg px-3 py-2 mb-4">{t("feedback_thanks")}</p>
         )}
@@ -3591,7 +3587,7 @@ function MatchaApp({ lang, setLang, records, setRecords, visits, setVisits, user
   return (
     <div className="min-h-screen w-full bg-[#E0E6DA] font-body text-[#2E2A24] content-safe-pb">
       {FONT_STYLE}
-      <main className="max-w-3xl mx-auto px-6">
+      <main className="max-w-3xl mx-auto px-5">
         {tab === "home" && (
           <HomeTab lang={lang} records={records} userEmail={userEmail} nickname={nickname} isGuest={isGuest}
             onAdd={openAdd} onGoRecords={() => setTab("records")} onEdit={openEdit} />
