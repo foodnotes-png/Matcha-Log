@@ -1615,8 +1615,8 @@ function AddRecordScreen({ lang, onCancel, onSave, onDelete, initialRecord, onLo
           </button>
           {initialRecord && (
             <div className="flex flex-col items-end gap-2">
-              <button type="button" aria-current="true" className="text-[15px] px-4 py-1.5 rounded-full border border-[#8DC48D] bg-[#EAF3E8] text-[#2B7056] flex items-center gap-1.5">
-                <EditIcon size={14} /> {t("action_edit")}
+              <button type="button" onClick={submit} disabled={!formValid} className="text-[15px] px-4 py-1.5 rounded-full border border-[#8DC48D] bg-[#EAF3E8] text-[#2B7056] flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 3h11a1 1 0 011 1v17l-6.5-4.2L5.5 21V4a1 1 0 011-1z" /></svg> {t("action_save")}
               </button>
               <button type="button" onClick={() => setConfirmDelete(true)} className="btn-danger text-[15px] px-4 py-1.5 rounded-full border flex items-center gap-1.5">
                 <TrashIcon size={14} /> {t("delete")}
@@ -1981,7 +1981,7 @@ function HomeTab({ lang, records, userEmail, nickname, isGuest, onAdd, onGoRecor
           <p className="text-[14px] text-[#8A8371] py-4 text-center">{t("home_fav_empty")}</p>
         ) : (
           <div className="flex flex-col gap-3">
-            {favorites.slice(0, 2).map((r) => <RecordListCard key={r.id} r={r} lang={lang} t={t} compact favInline />)}
+            {favorites.slice(0, 2).map((r) => <RecordListCard key={r.id} r={r} lang={lang} t={t} compact favInline onClick={() => onEdit && onEdit(r)} />)}
           </div>
         )}
       </div>
