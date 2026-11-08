@@ -326,7 +326,7 @@ const STR = {
     records_empty: "找不到符合條件的紀錄，換個關鍵字或篩選條件看看。",
     add_title: "新增紀錄", edit_title: "編輯紀錄", add_back: "← 返回",
     add_photo: "抹茶照片", add_photo_hint: "上傳照片作為圖示（選填）",
-    add_photo_remove: "移除照片", photo_new: "上傳照片作為圖示", add_photo_opt: "（選填）", photo_change: "更換照片", photo_adjust: "調整大小", crop_title: "調整照片", crop_hint: "拖曳移動位置，滑桿調整大小", crop_zoom: "縮放", crop_done: "完成",
+    add_photo_remove: "移除照片", photo_new: "上傳照片作為圖示", add_photo_opt: "（選填）", photo_change: "更換照片", photo_adjust: "調整大小", footer_made: "Matcha Log 製作 by ", footer_note: "資料只會儲存於本裝置，清除瀏覽器紀錄或於手機主畫面移除web app，資料會一同清除，請記得定期匯出備份。", crop_title: "調整照片", crop_hint: "拖曳移動位置，滑桿調整大小", crop_zoom: "縮放", crop_done: "完成",
     add_brand: "品牌 *", add_brand_ph: "請選擇品牌", add_brand_other_ph: "請輸入品牌名稱",
     add_category: "茶品類別", add_category_ph: "請選擇類別", add_category_other_ph: "請輸入類別",
     add_origin: "產地", add_cultivar: "銘柄/產品名稱", add_origin_ph: "請輸入產地",
@@ -411,7 +411,7 @@ const STR = {
     records_empty: "No matching records — try a different keyword or filter.",
     add_title: "Add Record", edit_title: "Edit Record", add_back: "← Back",
     add_photo: "Matcha Photo", add_photo_hint: "Upload a photo as the record icon (optional)",
-    add_photo_remove: "Remove photo", photo_new: "Upload photo as icon", add_photo_opt: "(optional)", photo_change: "Change Photo", photo_adjust: "Resize", crop_title: "Adjust Photo", crop_hint: "Drag to move, use the slider to zoom", crop_zoom: "Zoom", crop_done: "Done",
+    add_photo_remove: "Remove photo", photo_new: "Upload photo as icon", add_photo_opt: "(optional)", photo_change: "Change Photo", photo_adjust: "Resize", footer_made: "Matcha Log made by ", footer_note: "Data is stored only on this device. Clearing browser data or removing the web app from your home screen will erase it, so please export a backup regularly.", crop_title: "Adjust Photo", crop_hint: "Drag to move, use the slider to zoom", crop_zoom: "Zoom", crop_done: "Done",
     add_brand: "Brand *", add_brand_ph: "Select a brand", add_brand_other_ph: "Enter brand name",
     add_category: "Tea Category", add_category_ph: "Select a category", add_category_other_ph: "Enter category",
     add_origin: "Origin", add_cultivar: "Cultivar / Product Name", add_origin_ph: "Enter origin",
@@ -858,15 +858,18 @@ function AuthScreen({ onEnter, lang, setLang }) {
           </form>
         </div>
         <div className="absolute top-full left-0 right-0 mt-5">
-          <p className="text-center text-[14px] text-[#B0A990]">{A.note}</p>
           {(
-            <div className="mt-4 rounded-3xl border border-[#D5E3D0] bg-gradient-to-br from-[#EAF3E8] to-[#E0E9DA] px-4 py-3 flex items-center gap-3">
+            <div className="rounded-3xl border border-[#D5E3D0] bg-gradient-to-br from-[#EAF3E8] to-[#E0E9DA] px-4 py-3 flex items-center gap-3">
               <div className="flex-1 min-w-0">
                 <p className="text-[15px] font-bold text-[#1B4A38] flex items-center gap-1.5"><RowIcon name="install" size={18} color="#2B7056" /><span>{A.tipTitle}</span></p>
                 <p className="text-[13px] text-[#6B6558] leading-snug mt-1">{A.tipA}<span className="inline-block align-[-3px] mx-1"><RowIcon name="share" size={16} color="#2B7056" /></span>{A.tipB}</p>
               </div>
             </div>
           )}
+          <div className="mt-6 text-center text-[13px] leading-relaxed text-[#8A8371]">
+            <p>{STR[lang].footer_made}<a href="https://www.instagram.com/foodnotes.png/" target="_blank" rel="noopener noreferrer" style={{ color: "#2B7056", textDecoration: "none", fontWeight: 700 }}>@foodnotes.png</a></p>
+            <p className="mt-1.5">{STR[lang].footer_note}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -3642,6 +3645,10 @@ function MatchaApp({ lang, setLang, records, setRecords, visits, setVisits, user
         {tab === "settings" && (
           <SettingsTab lang={lang} setLang={setLang} userEmail={userEmail} nickname={nickname} isGuest={isGuest} onGoToAuth={onGoToAuth} onLogout={onLogout} onSetNickname={onSetNickname} records={records} setRecords={setRecords} visits={visits} setVisits={setVisits} />
         )}
+        <footer className="mt-10 pb-8 text-center text-[13px] leading-relaxed text-[#8A8371]">
+          <p>{STR[lang].footer_made}<a href="https://www.instagram.com/foodnotes.png/" target="_blank" rel="noopener noreferrer" style={{ color: "#2B7056", textDecoration: "none", fontWeight: 700 }}>@foodnotes.png</a></p>
+          <p className="mt-1.5">{STR[lang].footer_note}</p>
+        </footer>
       </main>
 
       {renderNav(tab, setTab)}
